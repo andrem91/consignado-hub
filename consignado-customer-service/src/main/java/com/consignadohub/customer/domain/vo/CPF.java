@@ -3,8 +3,8 @@ package com.consignadohub.customer.domain.vo;
 import com.consignadohub.customer.domain.exception.InvalidCPFException;
 
 public record CPF(String valor) {
-    public CPF {
 
+    public CPF {
         if (valor == null || valor.isBlank()) {
             throw new InvalidCPFException("CPF não pode ser nulo ou vazio");
         }
@@ -13,7 +13,6 @@ public record CPF(String valor) {
         if (valor.length() != 11) {
             throw new InvalidCPFException("CPF deve conter 11 dígitos");
         }
-
         if (todosDigitosIguais(valor)) {
             throw new InvalidCPFException("CPF com dígitos repetidos é inválido");
         }
@@ -23,7 +22,10 @@ public record CPF(String valor) {
     }
 
     public String formatar() {
-        return valor.substring(0, 3) + "." + valor.substring(3, 6) + "." + valor.substring(6, 9) + "-" + valor.substring(9, 11);
+        return valor.substring(0, 3) + "." +
+                valor.substring(3, 6) + "." +
+                valor.substring(6, 9) + "-" +
+                valor.substring(9, 11);
     }
 
     public String mascarar() {
@@ -36,15 +38,11 @@ public record CPF(String valor) {
     }
 
     private static boolean todosDigitosIguais(String cpf) {
-        char first = cpf.charAt(0);
+        char primeiro = cpf.charAt(0);
         for (int i = 1; i < cpf.length(); i++) {
-            if (cpf.charAt(i) != first) return false;
+            if (cpf.charAt(i) != primeiro) return false;
         }
         return true;
-    }
-
-    public String valor() {
-        return valor;
     }
 
     private static boolean digitosVerificadoresValidos(String cpf) {
