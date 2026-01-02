@@ -10,19 +10,20 @@
 | Campo | Valor |
 |-------|-------|
 | **Sprint Atual** | Sprint 0 - Setup & Value Objects |
-| **Status** | ⏳ Não iniciada |
-| **Última Atualização** | 2026-01-01 |
-| **Próxima Tarefa** | Criar repositório GitHub |
+| **Status** | 🟡 Em andamento |
+| **Última Atualização** | 2026-01-02 |
+| **Próxima Tarefa** | Implementar CPF Value Object (TDD) |
 
 ---
 
 ## ✅ Progresso por Sprint
 
 ### Sprint 0: Setup & Value Objects
-- [ ] Criar repositório GitHub
-- [ ] Configurar projeto Maven
+- [x] Criar repositório GitHub
+- [x] Configurar projeto Maven (Spring Initializr)
+- [x] Estrutura de pacotes Hexagonal (domain, application, adapter)
 - [ ] docker-compose.yml base
-- [ ] CPF + tests
+- [ ] CPF + tests ← **PRÓXIMO**
 - [ ] Money + tests
 - [ ] BenefitNumber + tests
 - [ ] InterestRate + tests
@@ -129,18 +130,25 @@
 
 ## 📌 Última Sessão
 
-**Data:** 2026-01-01
+**Data:** 2026-01-02
 
 **O que foi feito:**
-- Criada estrutura de documentação completa
-- PROJETO_CONSIGNADO.md com regras de negócio
-- ROTEIRO_IMPLEMENTACAO.md com 4712 linhas
-- Sistema de incidentes híbrido configurado
+- Repositório GitHub criado e configurado
+- Projeto `consignado-customer-service` gerado via Spring Initializr
+  - Java 21, Spring Boot 3.5.9, Maven
+  - Dependências: Web, JPA, PostgreSQL, Flyway, Validation, Lombok, Actuator
+- Estrutura de pacotes Arquitetura Hexagonal criada:
+  - `domain/` (vo, model, exception)
+  - `application/` (port/in, port/out, service)
+  - `adapter/` (in/web, out/persistence)
+- `application.properties` configurado (JPA/Flyway desabilitados temporariamente)
+- Documentação completa adicionada (ROTEIRO, PROJETO_CONSIGNADO, INCIDENTES)
 
 **Próximos passos:**
-- Iniciar Sprint 0
-- Criar repositório GitHub
-- Implementar primeiros Value Objects
+- Criar `DomainException` e `InvalidCPFException`
+- Implementar `CPFTest.java` (teste primeiro - TDD)
+- Implementar `CPF.java` Value Object
+- Continuar com demais Value Objects
 
 ---
 
