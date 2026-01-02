@@ -4,10 +4,13 @@ import com.consignadohub.customer.domain.exception.InvalidDinheiroException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.util.Locale;
 
-public record Dinheiro(BigDecimal valor) {
+public record Dinheiro(BigDecimal valor) implements Comparable<Dinheiro> {
 
     public static final Dinheiro ZERO = new Dinheiro(BigDecimal.ZERO);
+    private static final NumberFormat FORMATTER = NumberFormat.getCurrencyInstance(Locale.of("pt", "BR"));
 
     public Dinheiro {
         if (valor == null) {
@@ -29,7 +32,43 @@ public record Dinheiro(BigDecimal valor) {
         return new Dinheiro(new BigDecimal(valor));
     }
 
-    public Dinheiro somar(Dinheiro dinheiro) {
-        return new Dinheiro(this.valor.add(dinheiro.valor));
+    public Dinheiro somar(Dinheiro outro) {
+        validarOperando(outro);
+        return new Dinheiro(this.valor.add(outro.valor));
     }
+
+    public Dinheiro subtrair(Dinheiro outro) {
+        validarOperando(outro);
+        return new Dinheiro(this.valor.subtract(outro.valor));
+    }
+
+    public Dinheiro multiplicar(int quantidade) {
+        return new Dinheiro(this.valor.multiply(BigDecimal.valueOf(quantidade)));
+    }
+
+    public boolean maiorQue(Dinheiro outro) {
+        validarOperando(outro);
+        return this.valor.compareTo(outro.valor) > 0;
+    }
+
+    public boolean menorOuIgual(Dinheiro outro) {
+        return !maiorQue(outro);
+    }
+
+    public String formatado() {
+        return FORMATTER.format(this.valor);
+    }
+
+    @Override
+    public int compareTo(Dinheiro o) {
+        return this.valor.compareTo(o.valor);
+    }
+
+    private void validarOperando(Dinheiro outro) {
+        if (outro == null) {
+            throw new InvalidDinheiroException("Não é possível operar com valor nulo");
+        }
+
+    }
+
 }
