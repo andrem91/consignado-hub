@@ -244,6 +244,150 @@ Fator = 52,46
 Valor Máximo = R$ 500 × 52,46 = R$ 26.230,00
 ```
 
+### 4.5 Juros Pro-Rata (Apropriação Diária)
+
+Os juros são **apropriados diariamente**, não no vencimento da parcela. Isso significa que:
+
+| Conceito | Descrição |
+|----------|-----------|
+| **Saldo Devedor** | Atualizado diariamente com juros |
+| **Pagamento Antecipado** | Cliente paga menos (juros até a data do pagamento) |
+| **Pagamento Atrasado** | Cliente paga mais (juros de mora + multa) |
+
+#### Fórmula de Juros Diários
+
+```
+Taxa Diária = (1 + Taxa Mensal)^(1/30) - 1
+
+Juros do Dia = Saldo Devedor × Taxa Diária
+```
+
+**Exemplo:**
+```
+Taxa mensal: 1,66%
+Taxa diária: (1 + 0,0166)^(1/30) - 1 = 0,0548% ao dia
+
+Saldo devedor: R$ 10.000,00
+Juros do dia: R$ 10.000 × 0,000548 = R$ 5,48
+```
+
+### 4.6 Quitação Antecipada
+
+O cliente pode quitar o contrato antecipadamente com **desconto dos juros futuros**.
+
+#### Cálculo do Valor de Quitação
+
+```
+Valor Quitação = Saldo Devedor + Juros Pro-Rata até a data
+
+Onde:
+- Saldo Devedor = Principal não amortizado
+- Juros Pro-Rata = Juros acumulados desde o último pagamento
+```
+
+**Regras:**
+- Cliente tem direito ao desconto (Lei 14.690/2023)
+- Desconto proporcional às parcelas não vencidas
+- IOF já pago NÃO é devolvido
+
+#### Exemplo Prático
+
+```
+Contrato: R$ 10.000 em 48 parcelas de R$ 318,71
+Quitação na parcela 12:
+
+- Parcelas pagas: 12 × R$ 318,71 = R$ 3.824,52
+- Principal amortizado: ~R$ 2.500
+- Saldo devedor: ~R$ 7.500
+- Juros pro-rata (15 dias): ~R$ 60
+- Valor de quitação: ~R$ 7.560 (ao invés de 36 × R$ 318,71 = R$ 11.473,56)
+```
+
+### 4.7 Amortização Extraordinária
+
+O cliente pode pagar um valor extra para **reduzir o saldo devedor**:
+
+| Opção | Efeito |
+|-------|--------|
+| **Reduzir Prazo** | Mantém parcela, termina antes |
+| **Reduzir Parcela** | Mantém prazo, parcela menor |
+
+### 4.8 Mora e Multa (Atraso)
+
+| Componente | Valor |
+|------------|-------|
+| **Multa** | Até 2% sobre a parcela |
+| **Juros de Mora** | 1% ao mês (pro-rata diário) |
+| **Correção Monetária** | IPCA/IGPM (se previsto em contrato) |
+
+---
+
+## 4.9 Operações Adicionais
+
+### Portabilidade
+
+> Transferência de contrato entre bancos
+
+| Aspecto | Descrição |
+|---------|-----------|
+| **Objetivo** | Conseguir melhores condições (taxa/prazo) |
+| **Margem** | NÃO consome margem adicional |
+| **Processo** | Banco destino quita o banco origem |
+| **Prazo** | Até 5 dias úteis |
+
+### Refinanciamento
+
+> Renegociação no mesmo banco
+
+| Aspecto | Descrição |
+|---------|-----------|
+| **Objetivo** | Liberar margem ou reduzir parcela |
+| **Margem** | Pode liberar parte da margem |
+| **Restrição** | Aguardar 90 dias entre refinanciamentos |
+| **Troco** | Pode receber valor adicional |
+
+### Carência
+
+> Período inicial sem pagamento de parcelas
+
+| Aspecto | Descrição |
+|---------|-----------|
+| **Prazo típico** | 30 a 90 dias |
+| **Juros** | Acumulam durante a carência |
+| **Uso** | Promoções, situações especiais |
+
+### Seguro Prestamista
+
+> Cobertura em caso de morte ou invalidez
+
+| Aspecto | Descrição |
+|---------|-----------|
+| **Cobertura** | Quita o saldo devedor |
+| **Beneficiários** | Herdeiros não herdam a dívida |
+| **Custo** | Incluso no CET |
+| **Obrigatório** | Não, mas geralmente oferecido |
+
+### Renegociação (Workout)
+
+> Para clientes inadimplentes
+
+| Aspecto | Descrição |
+|---------|-----------|
+| **Objetivo** | Regularizar situação |
+| **Opções** | Desconto, parcelamento, carência |
+| **Impacto** | Pode alterar condições originais |
+
+### Bloqueio/Desbloqueio
+
+> Suspensão temporária do contrato
+
+| Motivo | Ação |
+|--------|------|
+| **Ordem judicial** | Bloqueio compulsório |
+| **Suspeita de fraude** | Bloqueio preventivo |
+| **Óbito do beneficiário** | Bloqueio + acionamento seguro |
+| **Regularização** | Desbloqueio após análise |
+
 ---
 
 ## 5. Integrações
