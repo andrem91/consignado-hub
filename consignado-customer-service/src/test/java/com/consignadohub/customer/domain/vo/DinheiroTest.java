@@ -3,8 +3,6 @@ package com.consignadohub.customer.domain.vo;
 import com.consignadohub.customer.domain.exception.InvalidDinheiroException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 
