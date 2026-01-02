@@ -12,7 +12,7 @@
 | **Sprint Atual** | Sprint 0 - Setup & Value Objects |
 | **Status** | 🟡 Em andamento |
 | **Última Atualização** | 2026-01-02 |
-| **Próxima Tarefa** | Implementar CPF Value Object (TDD) |
+| **Próxima Tarefa** | Implementar BenefitNumber Value Object (TDD) |
 
 ---
 
@@ -23,8 +23,9 @@
 - [x] Configurar projeto Maven (Spring Initializr)
 - [x] Estrutura de pacotes Hexagonal (domain, application, adapter)
 - [ ] docker-compose.yml base
-- [ ] CPF + tests ← **PRÓXIMO**
-- [ ] Money + tests
+- [x] CPF + tests ✅
+- [x] Dinheiro + tests ✅
+- [ ] BenefitNumber + tests ← **PRÓXIMO**
 - [ ] BenefitNumber + tests
 - [ ] InterestRate + tests
 - [ ] MarginPercentage + tests
@@ -133,22 +134,22 @@
 **Data:** 2026-01-02
 
 **O que foi feito:**
-- Repositório GitHub criado e configurado
-- Projeto `consignado-customer-service` gerado via Spring Initializr
-  - Java 21, Spring Boot 3.5.9, Maven
-  - Dependências: Web, JPA, PostgreSQL, Flyway, Validation, Lombok, Actuator
-- Estrutura de pacotes Arquitetura Hexagonal criada:
-  - `domain/` (vo, model, exception)
-  - `application/` (port/in, port/out, service)
-  - `adapter/` (in/web, out/persistence)
-- `application.properties` configurado (JPA/Flyway desabilitados temporariamente)
-- Documentação completa adicionada (ROTEIRO, PROJETO_CONSIGNADO, INCIDENTES)
+- Value Object `CPF` implementado com TDD
+  - Validação completa (nulo, formato, dígitos repetidos, dígitos verificadores)
+  - Métodos: `formatar()`, `mascarar()`, `toString()`
+  - 7 testes unitários
+- Value Object `Dinheiro` implementado com TDD
+  - `BigDecimal` com 2 casas decimais (RoundingMode.HALF_UP)
+  - Factory method `of()` para criação
+  - Método `somar()` imutável
+  - 4 testes unitários
+- Exceções de domínio: `DomainException`, `InvalidCPFException`, `InvalidDinheiroException`
+- Nomenclatura em português para termos de domínio
 
 **Próximos passos:**
-- Criar `DomainException` e `InvalidCPFException`
-- Implementar `CPFTest.java` (teste primeiro - TDD)
-- Implementar `CPF.java` Value Object
-- Continuar com demais Value Objects
+- Implementar `BenefitNumber` (número do benefício INSS)
+- Implementar `InterestRate`, `MarginPercentage`, `LoanTerm`, `CET`
+- Configurar docker-compose.yml
 
 ---
 
