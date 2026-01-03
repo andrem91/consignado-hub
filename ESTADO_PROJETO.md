@@ -9,29 +9,30 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Sprint Atual** | Sprint 0 - Setup & Value Objects |
-| **Status** | 🟡 Em andamento |
-| **Última Atualização** | 2026-01-02 |
-| **Próxima Tarefa** | Implementar BenefitNumber Value Object (TDD) |
+| **Sprint Atual** | Sprint 0 - CONCLUÍDA ✅ |
+| **Status** | 🟢 Pronto para Sprint 1 |
+| **Última Atualização** | 2026-01-03 |
+| **Próxima Tarefa** | Spring Modulith + docker-compose OU Sprint 1 Customer |
 
 ---
 
 ## ✅ Progresso por Sprint
 
-### Sprint 0: Setup & Value Objects
+### Sprint 0: Setup & Value Objects ✅
 - [x] Criar repositório GitHub
 - [x] Configurar projeto Maven (Spring Initializr)
 - [x] Estrutura de pacotes Hexagonal (domain, application, adapter)
 - [ ] docker-compose.yml base
-- [x] CPF + tests ✅
-- [x] Dinheiro + tests ✅
-- [ ] BenefitNumber + tests ← **PRÓXIMO**
-- [ ] BenefitNumber + tests
-- [ ] InterestRate + tests
-- [ ] MarginPercentage + tests
-- [ ] LoanTerm + tests
-- [ ] CET + tests
+- [x] CPF + tests (7 testes) ✅
+- [x] Dinheiro + tests (9 testes) ✅
+- [x] NumeroBeneficio + tests (5 testes) ✅
+- [x] TaxaJuros + tests (4 testes) ✅
+- [x] PercentualMargem + tests (3 testes) ✅
+- [x] PrazoParcela + tests (3 testes) ✅
+- [x] CET + tests (4 testes) ✅
 - [ ] Spring Modulith setup
+
+**Total: 35 testes unitários passando!**
 
 ### Sprint 1: Customer Service
 - [ ] Customer (Aggregate)
