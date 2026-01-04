@@ -1,6 +1,8 @@
-# 📖 Módulo 1: Fundamentos Java Core (3 semanas)
+# 📖 Módulo 1 - Parte 2: Fundamentos Java Avançados
 
-> Dominar a base do Java é essencial. Este módulo cobre Collections, algoritmos, Streams, Optional, Concorrência e Memória.
+> Este módulo cobre Collections, algoritmos, Streams, Optional, Concorrência e Memória.
+> 
+> **Pré-requisito:** [Módulo 1 - Parte 1: Fundamentos Básicos](MODULO_01_PARTE_1_FUNDAMENTOS_BASICOS.md)
 
 ---
 
