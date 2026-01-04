@@ -43,4 +43,18 @@ class BeneficioTest {
         assertThat(margem.valor()).isEqualByComparingTo("700.00");
     }
 
+    @Test
+    @DisplayName("Deve retornar zero para benefício não consignável")
+    void deveRetornarZeroParaNaoConsignavel() {
+        Beneficio beneficio = new Beneficio(
+                new NumeroBeneficio("1234567890"),
+                TipoBeneficio.BPC_LOAS,  // Não permite consignado
+                Dinheiro.of("2000.00"),
+                LocalDate.now()
+        );
+
+        assertThat(beneficio.calcularMargemEmprestimo())
+                .isEqualTo(Dinheiro.ZERO);
+    }
+
 }

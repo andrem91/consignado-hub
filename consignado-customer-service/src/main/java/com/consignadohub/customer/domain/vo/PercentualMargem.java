@@ -3,6 +3,7 @@ package com.consignadohub.customer.domain.vo;
 import com.consignadohub.customer.domain.exception.InvalidPercentualMargemException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public record PercentualMargem(BigDecimal valor) {
 
@@ -23,5 +24,10 @@ public record PercentualMargem(BigDecimal valor) {
 
     public static PercentualMargem of (BigDecimal valor) {
         return new PercentualMargem(valor);
+    }
+
+    public Dinheiro calcularMargem(Dinheiro valorBase) {
+        BigDecimal fator = this.valor.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
+        return Dinheiro.of(valorBase.valor().multiply(fator));
     }
 }

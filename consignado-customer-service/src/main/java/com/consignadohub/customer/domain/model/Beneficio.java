@@ -1,7 +1,9 @@
 package com.consignadohub.customer.domain.model;
 
+import com.consignadohub.customer.domain.exception.InvalidBeneficioException;
 import com.consignadohub.customer.domain.vo.Dinheiro;
 import com.consignadohub.customer.domain.vo.NumeroBeneficio;
+import com.consignadohub.customer.domain.vo.PercentualMargem;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -10,8 +12,6 @@ import java.util.UUID;
 
 @Getter
 public class Beneficio {
-
-    private static final BigDecimal PERCENTUAL_MARGEM_EMPRESTIMO = new BigDecimal("0.35");
 
     private final UUID id;
     private final NumeroBeneficio numero;
@@ -25,6 +25,15 @@ public class Beneficio {
             Dinheiro valorMensal,
             LocalDate dataInicio
     ) {
+        if (numero == null) throw new InvalidBeneficioException("Número do benefício é obrigatório");
+        if (tipo == null) throw new InvalidBeneficioException("Tipo do benefício é obrigatório");
+        if (valorMensal == null) throw new InvalidBeneficioException("Valor do benefício é obrigatório");
+        if (dataInicio == null) throw new InvalidBeneficioException("Data de início do benefício é obrigatória");
+
+        if (dataInicio.isAfter(LocalDate.now())) {
+            throw new InvalidBeneficioException("Data de início não pode ser futura");
+        }
+
         this.id = UUID.randomUUID();
         this.numero = numero;
         this.tipo = tipo;
@@ -33,10 +42,9 @@ public class Beneficio {
     }
 
     public Dinheiro calcularMargemEmprestimo() {
-        return Dinheiro.of(valorMensal.valor()
-                .multiply(PERCENTUAL_MARGEM_EMPRESTIMO)
-        );
+        if (!tipo.isConsignavel()) {
+            return Dinheiro.ZERO;
+        }
+        return PercentualMargem.LIMITE_EMPRESTIMO.calcularMargem(this.valorMensal);
     }
-
-
 }

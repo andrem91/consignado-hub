@@ -9,91 +9,65 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Sprint Atual** | Sprint 0 - CONCLUÍDA ✅ |
-| **Status** | 🟢 Pronto para Sprint 1 |
-| **Última Atualização** | 2026-01-03 |
-| **Próxima Tarefa** | Spring Modulith + docker-compose OU Sprint 1 Customer |
+| **Sprint Atual** | Sprint 1 - Em andamento 🔄 |
+| **Status** | 🟡 Fase 1 Domain (sem banco) |
+| **Última Atualização** | 2026-01-04 |
+| **Próxima Tarefa** | ClienteId VO + Cliente Aggregate |
 
 ---
 
 ## ✅ Progresso por Sprint
 
 ### Sprint 0: Setup & Value Objects ✅
-- [x] Criar repositório GitHub
-- [x] Configurar projeto Maven (Spring Initializr)
-- [x] Estrutura de pacotes Hexagonal (domain, application, adapter)
-- [ ] docker-compose.yml base
-- [x] CPF + tests (7 testes) ✅
-- [x] Dinheiro + tests (9 testes) ✅
-- [x] NumeroBeneficio + tests (5 testes) ✅
-- [x] TaxaJuros + tests (4 testes) ✅
-- [x] PercentualMargem + tests (3 testes) ✅
-- [x] PrazoParcela + tests (3 testes) ✅
-- [x] CET + tests (4 testes) ✅
-- [ ] Spring Modulith setup
+- [x] Repositório GitHub, projeto Maven, estrutura Hexagonal
+- [x] CPF (7), Dinheiro (9), NumeroBeneficio (5), TaxaJuros (4)
+- [x] PercentualMargem (3+1), PrazoParcela (3), CET (4)
+- **Total Sprint 0: 35 testes ✅**
 
-**Total: 35 testes unitários passando!**
+### Sprint 1: Customer Service 🔄
 
-### Sprint 1: Customer Service
-- [ ] Customer (Aggregate)
-- [ ] Benefit (Entity)
-- [ ] Margin (Value Object)
-- [ ] Ports (Use Cases)
-- [ ] Adapters (JPA, REST)
-- [ ] Mock Dataprev
-- [ ] Flyway migrations
-- [ ] Testes de integração
+#### Fase 1: Domain (sem banco)
+- [x] Email VO (4 testes) ✅
+- [x] Telefone VO (5 testes) ✅
+- [x] DataNascimento VO (5 testes) ✅
+- [x] TipoBeneficio Enum (8 testes) - com `isConsignavel()` ✅
+- [x] Beneficio Entity (3 testes) - validações fail-fast ✅
+- [ ] ClienteId VO ← **PRÓXIMO**
+- [ ] Cliente Aggregate
 
-### Sprint 2: Simulation Service
-- [ ] Simulation (Aggregate)
-- [ ] Cálculo Price
-- [ ] Cálculo IOF
-- [ ] Cálculo CET
-- [ ] Validação margem
-- [ ] Feign Client
+#### Fase 2: Application (sem banco)
+- [ ] Ports (Use Cases interfaces)
+- [ ] CustomerService
 
-### Sprint 3: Credit Analysis
-- [ ] CreditAnalysis (Aggregate)
-- [ ] CreditScore (VO)
-- [ ] Regras de negócio
-- [ ] Regra dos 90 dias
-- [ ] Kafka Producer
-- [ ] Idempotência Redis
+#### Fase 3: Adapters (precisa docker-compose)
+- [ ] docker-compose.yml
+- [ ] JPA Entities + Migrations
+- [ ] Controllers + Integration Tests
 
-### Sprint 4: Loan + Averbation
-- [ ] Contract (Aggregate)
-- [ ] Averbation (Entity)
-- [ ] Saga de Averbação
-- [ ] Kafka Consumer
-- [ ] Resilience4j
-- [ ] Mock Dataprev
+**Total Sprint 1 até agora: 25 testes ✅**
+**Total Geral: 60+ testes ✅**
 
-### Sprint 5: Payment Service
-- [ ] Installment (Entity)
-- [ ] Payment (Entity)
-- [ ] Scheduler vencimentos
-- [ ] Quitação antecipada
+---
 
-### Sprint 6: Gateway + Keycloak
-- [ ] Spring Cloud Gateway
-- [ ] Keycloak setup
-- [ ] OAuth2/JWT
-- [ ] Multi-canal
-- [ ] Rate Limiting
+## 📐 Regras de Desenvolvimento
 
-### Sprint 7: DevOps
-- [ ] Dockerfile otimizado
-- [ ] Docker Compose completo
-- [ ] GitHub Actions
-- [ ] Prometheus + Grafana
-- [ ] Jaeger
+### Nomenclatura
+| Elemento | Idioma | Exemplo |
+|----------|--------|---------|
+| Classes de domínio | 🇧🇷 Português | `Beneficio`, `Cliente`, `Dinheiro` |
+| Atributos/métodos negócio | 🇧🇷 Português | `valorMensal`, `calcularMargem()` |
+| Factory methods | 🇺🇸 Inglês | `of()`, `novo()` |
+| Patterns técnicos | 🇺🇸 Inglês | `@Getter`, `Repository`, `Service` |
 
-### Sprint 8-11: Cloud
-- [ ] Kubernetes manifests
-- [ ] Helm charts
-- [ ] AWS LocalStack
-- [ ] Terraform
-- [ ] E2E Tests
+### TDD
+1. Escrever TESTE primeiro (Red)
+2. Implementar mínimo para passar (Green)
+3. Refatorar (Refactor)
+
+### Arquitetura Hexagonal
+- **Domain**: Sem dependências externas, sem @Entity JPA
+- **Application**: Ports (interfaces) + Services
+- **Adapter**: JPA, REST, Kafka (com anotações framework)
 
 ---
 
@@ -105,65 +79,33 @@
 
 ---
 
-## 🐛 Bugs Conhecidos
-
-| ID | Sprint | Status | Descrição |
-|----|--------|--------|-----------|
-| - | - | - | Nenhum bug pendente |
-
----
-
-## 📝 Histórico de Incidentes Resolvidos
-
-| ID | Sprint | Tipo | Causa Raiz | Solução |
-|----|--------|------|------------|---------|
-| - | - | - | - | (será preenchido durante o projeto) |
-
----
-
-## 💡 Lições Aprendidas
-
-> Esta seção é preenchida após resolver incidentes.
-> Use para entrevistas: "Conte um problema que você resolveu".
-
-1. *(será preenchido durante o projeto)*
-
----
-
 ## 📌 Última Sessão
 
-**Data:** 2026-01-02
+**Data:** 2026-01-04
 
 **O que foi feito:**
-- Value Object `CPF` implementado com TDD
-  - Validação completa (nulo, formato, dígitos repetidos, dígitos verificadores)
-  - Métodos: `formatar()`, `mascarar()`, `toString()`
-  - 7 testes unitários
-- Value Object `Dinheiro` implementado com TDD
-  - `BigDecimal` com 2 casas decimais (RoundingMode.HALF_UP)
-  - Factory method `of()` para criação
-  - Método `somar()` imutável
-  - 4 testes unitários
-- Exceções de domínio: `DomainException`, `InvalidCPFException`, `InvalidDinheiroException`
-- Nomenclatura em português para termos de domínio
+- Sprint 0 concluída (7 Value Objects, 35 testes)
+- Sprint 1 iniciada - Fase 1 Domain
+- VOs: Email, Telefone, DataNascimento
+- Enum: TipoBeneficio com `isConsignavel()`
+- Entity: Beneficio com validações fail-fast
+- PercentualMargem: adicionado `calcularMargem()`
+- Módulo 1 dividido em Parte 1 (Básicos) e Parte 2 (Avançados)
 
 **Próximos passos:**
-- Implementar `BenefitNumber` (número do benefício INSS)
-- Implementar `InterestRate`, `MarginPercentage`, `LoanTerm`, `CET`
-- Configurar docker-compose.yml
+- Implementar ClienteId VO
+- Implementar Cliente Aggregate Root
+- Continuar Fase 1 Domain
 
 ---
 
 ## 🔧 Como Continuar em Nova Conversa
 
-1. Abra o arquivo `/modo-mentor` ou cole:
-   ```
-   Continuando projeto ConsignadoHub. 
-   Leia ESTADO_PROJETO.md para contexto.
-   Sprint atual: [VER ACIMA]
-   ```
+Use: `/modo-mentor`
 
-2. A IA vai:
-   - Ler o estado atual
-   - Continuar de onde parou
-   - Injetar incidentes conforme o plano
+Ou cole:
+```
+Continuando projeto ConsignadoHub. 
+Leia ESTADO_PROJETO.md para contexto.
+Sprint atual: Sprint 1 - Fase 1 Domain
+```
