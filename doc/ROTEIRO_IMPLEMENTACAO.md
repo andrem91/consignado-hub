@@ -102,6 +102,65 @@ Sprint 7+ ░░░░░░░░░░░░░░░░░░░░░░░�
 
 ---
 
+## 📐 Regras de Desenvolvimento
+
+### Metodologia TDD
+
+Todos os componentes devem ser implementados seguindo **Test-Driven Development**:
+
+1. **Red** - Escrever teste que falha
+2. **Green** - Implementar mínimo para passar
+3. **Refactor** - Melhorar código mantendo testes verdes
+
+### Nomenclatura
+
+| Elemento | Idioma | Exemplo |
+|----------|--------|---------|
+| **Classes de domínio** | 🇧🇷 Português | `Beneficio`, `Cliente`, `Dinheiro` |
+| **Atributos de domínio** | 🇧🇷 Português | `valorMensal`, `dataInicio` |
+| **Métodos de negócio** | 🇧🇷 Português | `calcularMargem()`, `formatar()` |
+| **Factory methods** | 🇺🇸 Inglês | `of()`, `novo()` |
+| **Patterns técnicos** | 🇺🇸 Inglês | `Repository`, `Service`, `@Getter` |
+| **Exceções** | Híbrido | `InvalidCPFException` |
+
+### Arquitetura Hexagonal
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                      DOMAIN                              │
+│  - Sem dependências externas                            │
+│  - Sem @Entity JPA, sem @Service Spring                 │
+│  - Value Objects como records imutáveis                 │
+│  - Entities com validação fail-fast no construtor       │
+├─────────────────────────────────────────────────────────┤
+│                    APPLICATION                           │
+│  - Ports (interfaces)                                   │
+│  - Services (implementam use cases)                     │
+├─────────────────────────────────────────────────────────┤
+│                     ADAPTERS                             │
+│  - JPA Entities separadas das Domain Entities           │
+│  - Controllers, Repositories, Mappers                   │
+│  - Anotações de framework permitidas                    │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Validações em Entities
+
+```java
+public Beneficio(NumeroBeneficio numero, TipoBeneficio tipo, ...) {
+    // 1. Fail-fast: null checks primeiro
+    if (numero == null) throw new InvalidBeneficioException("...");
+    
+    // 2. Regras de negócio
+    if (dataInicio.isAfter(LocalDate.now())) throw new ...
+    
+    // 3. Atribuições
+    this.numero = numero;
+}
+```
+
+---
+
 ## 🎯 Sprint 0: MVP Setup
 
 > **Objetivo:** Ter o projeto rodando com os VOs essenciais
