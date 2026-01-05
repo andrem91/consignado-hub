@@ -89,6 +89,7 @@ Sprint 7+ ░░░░░░░░░░░░░░░░░░░░░░░�
 | Pattern | Sprint | O que é | Por que usar |
 |---------|--------|---------|--------------|
 | **CQS** | 1+ | Separar interfaces Read/Write (mesmo banco) | Clareza no código, prepara para CQRS |
+| **Event Sourcing + Ledger** | 4 | Eventos de negócio + eventos de saldo | Conciliação contábil, auditoria |
 | **Feature Flags** | 6 | Ligar/desligar features sem redeploy | Deploy seguro, rollout gradual |
 | **BFF + GraphQL** | 7 | API específica para Mobile/Web | Experience API vs Domain API |
 | **Serverless** | 8 | Lambda para Mock Dataprev | Simula webhook externo |
@@ -98,7 +99,6 @@ Sprint 7+ ░░░░░░░░░░░░░░░░░░░░░░░�
 
 | Pattern | Por que não | Alternativa |
 |---------|-------------|-------------|
-| **Event Sourcing** | Complexo demais para o escopo | Log de auditoria no DynamoDB |
 | **CQRS Puro** | Requer bancos separados | CQS lógico (mesma infra) |
 | **Service Mesh** | Muito pesado localmente | Mencionar Istio, não implementar |
 | **Strangler Fig** | Projeto greenfield (sem legado) | Saber explicar em entrevista |
@@ -117,6 +117,90 @@ CQS (Vamos usar):                 CQRS (Não usar):
      ↓ Mesmo banco ↓                Complexidade: 🟢 Baixa (CQS)
     PostgreSQL
 ```
+
+### 🏦 Event Sourcing + Ledger (Sprint 4)
+
+#### Decisão Arquitetural
+
+| Módulo | Arquitetura | Justificativa |
+|--------|-------------|---------------|
+| **CustomerService** | DDD Clássico | Cadastro não precisa auditoria contábil |
+| **ContractService** | Event Sourcing + Ledger | Contrato financeiro PRECISA rastreabilidade |
+
+#### Por que usar apenas no ContractService?
+
+> *"Não usei Event Sourcing em tudo porque seria complexidade desnecessária. 
+> Usei apenas no módulo Financeiro/Contratos para garantir a conciliação contábil."*
+
+#### Estrutura de Eventos
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     CONTRATO SERVICE (Sprint 4)                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│   EVENTOS DE NEGÓCIO (O que aconteceu / A causa)                        │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │  ContratoAverbado { id, cpf, valor, taxa, prazo, momento }      │   │
+│   │  ParcelaRecebida { contratoId, parcela, valor, momento }        │   │
+│   │  ContratoQuitado { contratoId, valorTotal, momento }            │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                                │                                         │
+│                                ▼                                         │
+│   EVENTOS DE SALDO (Prova matemática / O efeito)                        │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │  LancamentoContabil {                                           │   │
+│   │      contratoId,                                                │   │
+│   │      contaDebito: "Ativo_Emprestimos",                          │   │
+│   │      contaCredito: "Caixa",                                     │   │
+│   │      valor,                                                     │   │
+│   │      saldoAnterior,                                             │   │
+│   │      saldoNovo,     // ← Snapshot para validação                │   │
+│   │      momento                                                    │   │
+│   │  }                                                              │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Implementação Java (Sprint 4)
+
+```java
+// Evento de Negócio
+public record ContratoAverbado(
+    ContratoId id,
+    CPF cpf,
+    Dinheiro valorContratado,
+    TaxaJuros taxa,
+    PrazoParcela prazo,
+    LocalDateTime momento
+) implements DomainEvent {}
+
+// Evento de Saldo (Ledger)
+public record LancamentoContabil(
+    ContratoId contratoId,
+    String contaDebito,
+    String contaCredito,
+    Dinheiro valor,
+    Dinheiro saldoAnterior,
+    Dinheiro saldoNovo,
+    LocalDateTime momento
+) implements DomainEvent {}
+```
+
+#### Fluxo Kafka
+
+```
+ContractService                    LedgerService
+      │                                  │
+      │  ContratoAverbado                │
+      ├──────────────────────────────────►
+      │                                  │
+      │              LancamentoContabil  │
+      │◄──────────────────────────────────
+      │                                  │
+```
+
 
 ---
 

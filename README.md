@@ -70,6 +70,7 @@ Use o comando: `/modo-mentor`
 ┌──────────┐   ┌────────────┐   ┌───────────┐   ┌──────────┐   ┌────────────┐
 │ Customer │   │ Simulation │   │  Credit   │   │   Loan   │   │  Payment   │
 │ Service  │   │  Service   │   │ Analysis  │   │ Service  │   │  Service   │
+│ (DDD)    │   │            │   │           │   │(E.Sourc) │   │            │
 └────┬─────┘   └─────┬──────┘   └─────┬─────┘   └────┬─────┘   └──────┬─────┘
      │               │               │               │                │
      └───────────────┴───────────────┴───────────────┴────────────────┘
@@ -81,10 +82,18 @@ Use o comando: `/modo-mentor`
                    ┌─────────────────┼─────────────────┐
                    │                 │                 │
             ┌──────┴──────┐  ┌───────┴───────┐  ┌──────┴──────┐
-            │ Averbation  │  │ Notification  │  │   Audit     │
-            │  Connector  │  │   Service     │  │   Service   │
+            │   Ledger    │  │ Notification  │  │   Audit     │
+            │  Service    │  │   Service     │  │   Service   │
             └─────────────┘  └───────────────┘  └─────────────┘
 ```
+
+### 💡 Decisão Arquitetural
+
+| Módulo | Arquitetura | Justificativa |
+|--------|-------------|---------------|
+| **CustomerService** | DDD Clássico + CQS | Cadastro simples |
+| **LoanService** | Event Sourcing + Ledger | Conciliação contábil financeira |
+| **LedgerService** | Event Sourcing | Eventos de saldo para auditoria |
 
 ---
 
@@ -93,9 +102,10 @@ Use o comando: `/modo-mentor`
 | Categoria | Tecnologias |
 |-----------|-------------|
 | **Backend** | Java 21, Spring Boot 3.5, Spring Cloud |
-| **Arquitetura** | DDD, Hexagonal, Event Sourcing |
+| **Arquitetura** | DDD, Hexagonal, Event Sourcing (Ledger), CQS |
 | **Banco de Dados** | PostgreSQL, Redis |
 | **Mensageria** | Apache Kafka |
+| **Patterns** | Feature Flags, BFF + GraphQL, Saga, Circuit Breaker |
 | **DevOps** | Docker, GitHub Actions, SonarCloud |
 | **Cloud** | AWS (LocalStack), Kubernetes, Terraform |
 | **Testes** | JUnit 5, Mockito, TestContainers, WireMock |

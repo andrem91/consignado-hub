@@ -1056,6 +1056,116 @@ public class ClienteService implements
 
 ---
 
+## 📚 6.14 Event Sourcing + Ledger ⭐ NOVO
+
+### Conceito
+Padrão usado em **sistemas financeiros** para garantir **conciliação contábil** e **auditoria completa**.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    EVENT SOURCING + LEDGER                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  EVENTO DE NEGÓCIO (A causa)          EVENTO DE SALDO (O efeito)            │
+│  ┌───────────────────────────┐        ┌───────────────────────────┐         │
+│  │  ContratoAverbado         │───────►│  LancamentoContabil       │         │
+│  │  { valor: 1000.00 }       │        │  { saldoAnterior: 50000   │         │
+│  └───────────────────────────┘        │    saldoNovo: 51000 }     │         │
+│                                       └───────────────────────────┘         │
+│                                                                              │
+│  PROVA MATEMÁTICA: Se saldoAnterior + valor = saldoNovo, está correto!     │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Quando Usar?
+
+| Módulo | Usar Event Sourcing? | Por quê |
+|--------|---------------------|---------|
+| CustomerService | ❌ Não | Cadastro simples, não precisa auditoria contábil |
+| ContractService | ✅ Sim | Contratos financeiros precisam rastreabilidade |
+| PaymentService | ✅ Sim | Pagamentos precisam conciliação |
+
+### Implementação
+
+```java
+// Evento de Negócio (o que aconteceu)
+public record ContratoAverbado(
+    ContratoId id,
+    CPF cpf,
+    Dinheiro valorContratado,
+    TaxaJuros taxa,
+    PrazoParcela prazo,
+    LocalDateTime momento
+) implements DomainEvent {}
+
+// Evento de Saldo (prova matemática)
+public record LancamentoContabil(
+    ContratoId contratoId,
+    String contaDebito,      // "Ativo_Emprestimos"
+    String contaCredito,     // "Caixa"
+    Dinheiro valor,
+    Dinheiro saldoAnterior,
+    Dinheiro saldoNovo,      // saldoAnterior + valor
+    LocalDateTime momento
+) implements DomainEvent {}
+```
+
+### Fluxo com Kafka
+
+```java
+// ContractService publica evento de negócio
+@Service
+public class ContractEventPublisher {
+    
+    private final KafkaTemplate<String, DomainEvent> kafka;
+    
+    public void publish(ContratoAverbado evento) {
+        kafka.send("contratos-topic", evento.id().toString(), evento);
+    }
+}
+
+// LedgerService escuta e cria evento de saldo
+@Service
+public class LedgerEventListener {
+    
+    @KafkaListener(topics = "contratos-topic")
+    public void onContratoAverbado(ContratoAverbado evento) {
+        Dinheiro saldoAtual = contaRepository.getSaldo("Ativo_Emprestimos");
+        
+        LancamentoContabil lancamento = new LancamentoContabil(
+            evento.id(),
+            "Ativo_Emprestimos",
+            "Caixa",
+            evento.valorContratado(),
+            saldoAtual,
+            saldoAtual.somar(evento.valorContratado()),
+            LocalDateTime.now()
+        );
+        
+        eventStore.append(lancamento);
+        kafka.send("ledger-topic", lancamento);
+    }
+}
+```
+
+### Benefícios
+
+| Benefício | Descrição |
+|-----------|-----------|
+| **Auditoria Completa** | Sabe exatamente o que aconteceu e quando |
+| **Conciliação** | Prova matemática de que saldos estão corretos |
+| **Replay** | Pode reconstruir estado a partir dos eventos |
+| **Debug** | Fácil identificar onde ocorreu erro |
+
+### Argumento de Entrevista
+
+> *"Não usei Event Sourcing em todo o sistema porque seria complexidade desnecessária. 
+> Apliquei apenas no módulo Financeiro/Contratos para garantir conciliação contábil, 
+> exatamente como se faz em grandes bancos."*
+
+---
+
 ## 🎯 Perguntas de Entrevista
 
 1. **Quando usar microsserviços vs monolito?**
@@ -1070,8 +1180,10 @@ public class ClienteService implements
 10. **Quando usar GraphQL vs REST?** 🆕
 11. **Qual a diferença entre CQS e CQRS?** 🆕
 12. **O que é BFF (Backend for Frontend)?** 🆕
+13. **O que é Event Sourcing + Ledger e quando usar?** 🆕
 
 ---
 
 > **Próximo módulo:** [Módulo 7 - Testes](MODULO_07_TESTES.md)
+
 
