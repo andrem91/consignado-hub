@@ -10,9 +10,9 @@
 | Campo | Valor |
 |-------|-------|
 | **Sprint Atual** | Sprint 1 - Em andamento 🔄 |
-| **Status** | 🟡 Fase 1 Domain (sem banco) |
-| **Última Atualização** | 2026-01-04 |
-| **Próxima Tarefa** | ClienteId VO + Cliente Aggregate |
+| **Status** | 🟢 Fase 1 COMPLETA, iniciando Fase 2 |
+| **Última Atualização** | 2026-01-05 |
+| **Próxima Tarefa** | Ports (CQS) + ClienteService |
 
 ---
 
@@ -26,26 +26,26 @@
 
 ### Sprint 1: Customer Service 🔄
 
-#### Fase 1: Domain (sem banco)
+#### ✅ Fase 1: Domain (COMPLETA)
 - [x] Email VO (4 testes) ✅
 - [x] Telefone VO (5 testes) ✅
 - [x] DataNascimento VO (5 testes) ✅
 - [x] TipoBeneficio Enum (8 testes) - com `isConsignavel()` ✅
 - [x] Beneficio Entity (3 testes) - validações fail-fast ✅
-- [ ] ClienteId VO ← **PRÓXIMO**
-- [ ] Cliente Aggregate
+- [x] ClienteId VO (3 testes) ✅
+- [x] Cliente Aggregate (3 testes) ✅
 
-#### Fase 2: Application (sem banco)
-- [ ] Ports (Use Cases interfaces)
-- [ ] CustomerService
+#### ⏳ Fase 2: Application (PRÓXIMA)
+- [ ] Ports CQS: Commands (Write) e Queries (Read)
+- [ ] ClienteService
 
 #### Fase 3: Adapters (precisa docker-compose)
 - [ ] docker-compose.yml
 - [ ] JPA Entities + Migrations
 - [ ] Controllers + Integration Tests
 
-**Total Sprint 1 até agora: 25 testes ✅**
-**Total Geral: 60+ testes ✅**
+**Total Sprint 1 Fase 1: 31 testes ✅**
+**Total Geral: 66+ testes ✅**
 
 ---
 

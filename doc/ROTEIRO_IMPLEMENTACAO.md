@@ -68,15 +68,55 @@ Sprint 7+ ░░░░░░░░░░░░░░░░░░░░░░░�
 
 ### O que muda em cada sprint
 
-| Sprint | Entrega MVP | Bug/Incidente | Refactor |
-|--------|-------------|---------------|----------|
+| Sprint | Entrega MVP | Bug/Incidente | Refactor/Pattern |
+|--------|-------------|---------------|------------------|
 | 0 | CPF + Money | 🐛 CPF com zeros | - |
-| 1 | Customer básico | 🐛 N+1 query | - |
+| 1 | Customer básico | 🐛 N+1 query | CQS (interfaces separadas) |
 | 2 | Simulation básica | 🐛 IOF errado | - |
 | 3 | Kafka + Credit | 🔴 Duplicação | Idempotência |
-| 4 | Loan + Averbação | 🔴 Circuit breaker | Resilience4j |
+| 4 | Loan + Averbação | 🔴 Circuit breaker | Resilience4j, Saga |
 | 5 | Payment | 📋 Margem config | External config |
-| 6 | Gateway | 📋 Multi-canal | Strategy pattern |
+| 6 | Gateway + **Feature Flags** | 📋 Multi-canal | Strategy, **LaunchDarkly** |
+| 7 | Docker/K8s + **BFF GraphQL** | - | **Spring for GraphQL** |
+| 8 | AWS LocalStack | - | **Lambda Mock Dataprev** |
+
+---
+
+## 🏗️ Arquiteturas e Patterns Adicionais
+
+### ✅ Planejados para o Projeto
+
+| Pattern | Sprint | O que é | Por que usar |
+|---------|--------|---------|--------------|
+| **CQS** | 1+ | Separar interfaces Read/Write (mesmo banco) | Clareza no código, prepara para CQRS |
+| **Feature Flags** | 6 | Ligar/desligar features sem redeploy | Deploy seguro, rollout gradual |
+| **BFF + GraphQL** | 7 | API específica para Mobile/Web | Experience API vs Domain API |
+| **Serverless** | 8 | Lambda para Mock Dataprev | Simula webhook externo |
+| **Canary Release** | 8 | Deploy gradual (1% → 100%) | Validar com % de usuários |
+
+### ❌ Não Planejados (mas saiba explicar)
+
+| Pattern | Por que não | Alternativa |
+|---------|-------------|-------------|
+| **Event Sourcing** | Complexo demais para o escopo | Log de auditoria no DynamoDB |
+| **CQRS Puro** | Requer bancos separados | CQS lógico (mesma infra) |
+| **Service Mesh** | Muito pesado localmente | Mencionar Istio, não implementar |
+| **Strangler Fig** | Projeto greenfield (sem legado) | Saber explicar em entrevista |
+
+### 💡 CQS vs CQRS
+
+```
+CQS (Vamos usar):                 CQRS (Não usar):
+┌─────────────────────────┐       ┌─────────────────────────────────┐
+│   CadastrarClienteUseCase │       │   Write Model    │   Read Model │
+│   (Command - Write)       │       │   PostgreSQL     │   MongoDB    │
+├───────────────────────────┤       │       ↓          │       ↓      │
+│   BuscarClienteQuery      │       │   Event Bus  ←───────────────── │
+│   (Query - Read)          │       └─────────────────────────────────┘
+└───────────────────────────┘       Complexidade: 🔴 Alta
+     ↓ Mesmo banco ↓                Complexidade: 🟢 Baixa (CQS)
+    PostgreSQL
+```
 
 ---
 
@@ -90,6 +130,7 @@ Sprint 7+ ░░░░░░░░░░░░░░░░░░░░░░░�
 | Canal `CORBAN` fixo | Token dinâmico | Sprint 6 |
 | Margem `35%` constante | Config table | Sprint 5 |
 | Mock inline | Feign Client | Sprint 4 |
+| Features hardcoded | Feature Flags | Sprint 6 |
 
 ### Patterns
 
@@ -98,7 +139,7 @@ Sprint 7+ ░░░░░░░░░░░░░░░░░░░░░░░�
 | Classe concreta | Strategy + Factory | Novo parceiro |
 | `if/else` | Strategy Pattern | 3º canal |
 | `.yml` | AWS Parameter Store | Multi-ambiente |
-| Service único | CQRS | Performance |
+| Use Case único | CQS (Command/Query) | Clareza |
 
 ---
 

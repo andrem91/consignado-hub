@@ -849,7 +849,210 @@ public class FallbackController {
             ));
     }
 }
+---
+
+## 📚 6.11 Feature Flags ⭐ NOVO
+
+### Conceito
+Ligar/desligar funcionalidades sem redeploy. Essencial para **deploys seguros** em produção.
+
 ```
+┌─────────────────────────────────────────────────────────────┐
+│                    FEATURE FLAGS                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Código vai para produção DESLIGADO                         │
+│           ↓                                                  │
+│  Liga para 1% dos usuários                                  │
+│           ↓                                                  │
+│  Se OK: Liga para 10%, 50%, 100%                            │
+│  Se ERRO: Desliga (Kill Switch)                             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Implementação com Spring
+```java
+@Configuration
+@EnableConfigurationProperties(FeatureFlagsProperties.class)
+public class FeatureFlagsConfig {
+    
+    @Bean
+    public FeatureFlags featureFlags(FeatureFlagsProperties props) {
+        return new FeatureFlags(props);
+    }
+}
+
+@ConfigurationProperties(prefix = "features")
+public record FeatureFlagsProperties(
+    boolean integracaoDataprev,
+    boolean novoCalculoIof,
+    int percentualRollout
+) {}
+
+// Uso no serviço
+@Service
+@RequiredArgsConstructor
+public class MargemService {
+    
+    private final FeatureFlags flags;
+    
+    public Margem consultar(CPF cpf) {
+        if (flags.isIntegracaoDataprevAtiva()) {
+            return dataprevClient.consultar(cpf);  // Nova integração
+        }
+        return consultarLegado(cpf);  // Fallback
+    }
+}
+```
+
+### application.yml
+```yaml
+features:
+  integracao-dataprev: false
+  novo-calculo-iof: true
+  percentual-rollout: 10
+```
+
+### Alternativa: LaunchDarkly (Produção)
+```java
+// Com LaunchDarkly SDK
+LDClient client = new LDClient("sdk-key");
+boolean showFeature = client.boolVariation("integracao-dataprev", user, false);
+```
+
+---
+
+## 📚 6.12 BFF + GraphQL ⭐ NOVO
+
+### Conceito
+**BFF (Backend for Frontend)**: API específica por tipo de cliente (Mobile, Web, Desktop).
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 ARQUITETURA BFF                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│   App Mobile ─────► Mobile BFF ─────┐                       │
+│                     (GraphQL)       │                       │
+│                                     ▼                       │
+│   Web Browser ────► Web BFF ───► Customer Service (REST)   │
+│                     (REST)         Loan Service (REST)     │
+│                                     Margin Service (REST)   │
+│   Desktop ────────► Desktop BFF ────┘                       │
+│                     (SOAP/REST)                             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### GraphQL BFF - Spring for GraphQL
+```java
+// schema.graphqls
+type Query {
+    cliente(cpf: String!): Cliente
+    margemDisponivel(cpf: String!): Margem
+}
+
+type Cliente {
+    id: ID!
+    nome: String!
+    cpf: String!
+    beneficios: [Beneficio!]!
+}
+
+type Margem {
+    disponivel: Float!
+    utilizada: Float!
+}
+```
+
+```java
+// Controller GraphQL
+@Controller
+public class ClienteGraphQLController {
+    
+    private final CustomerService customerService;
+    private final MarginService marginService;
+    
+    @QueryMapping
+    public ClienteDTO cliente(@Argument String cpf) {
+        // GraphQL chama os microsserviços REST
+        return customerService.findByCpf(cpf);
+    }
+    
+    @QueryMapping
+    public MargemDTO margemDisponivel(@Argument String cpf) {
+        return marginService.consultar(cpf);
+    }
+    
+    // Resolver para campo aninhado
+    @SchemaMapping(typeName = "Cliente", field = "beneficios")
+    public List<BeneficioDTO> beneficios(ClienteDTO cliente) {
+        return beneficioService.findByClienteId(cliente.id());
+    }
+}
+```
+
+### Benefícios
+| Aspecto | REST | GraphQL BFF |
+|---------|------|-------------|
+| **Overfetching** | Retorna tudo | Retorna só o pedido |
+| **Underfetching** | N chamadas | 1 chamada |
+| **Mobile** | Dados demais | Otimizado |
+
+---
+
+## 📚 6.13 CQS (Command Query Separation) ⭐ NOVO
+
+### Conceito
+Separar **operações de escrita** das **operações de leitura** em interfaces diferentes.
+
+```
+CQS (Simples - mesmo banco):          CQRS (Complexo - bancos separados):
+┌───────────────────────────────┐     ┌─────────────────────────────────────┐
+│   CadastrarClienteUseCase     │     │   Write Model    │    Read Model    │
+│   (Command - altera estado)   │     │   PostgreSQL     │    Elasticsearch │
+├───────────────────────────────┤     │       ↓          │         ↓        │
+│   BuscarClienteQuery          │     │   Event Bus  ←────────────────────  │
+│   (Query - consulta estado)   │     └─────────────────────────────────────┘
+└───────────────────────────────┘
+         ↓ Mesmo banco ↓
+        PostgreSQL
+```
+
+### Implementação CQS
+```java
+// Interfaces SEPARADAS por responsabilidade
+
+// COMMAND - Altera estado
+public interface CadastrarClienteUseCase {
+    ClienteId executar(CadastrarClienteCommand command);
+}
+
+public interface AtualizarClienteUseCase {
+    void executar(AtualizarClienteCommand command);
+}
+
+// QUERY - Apenas lê
+public interface BuscarClienteQuery {
+    Optional<ClienteDTO> porCpf(CPF cpf);
+    Optional<ClienteDTO> porId(ClienteId id);
+    List<ClienteDTO> listar(Pageable pageable);
+}
+
+// Service implementa as duas coisas, mas interfaces são separadas
+@Service
+public class ClienteService implements 
+        CadastrarClienteUseCase, 
+        BuscarClienteQuery {
+    // ...
+}
+```
+
+### Vantagens
+- **Clareza**: Sabe exatamente o que cada interface faz
+- **Flexibilidade**: Pode evoluir para CQRS depois
+- **Testabilidade**: Testa comandos e queries separadamente
 
 ---
 
@@ -863,7 +1066,12 @@ public class FallbackController {
 6. **O que é Arquitetura Hexagonal?**
 7. **Como funciona uma State Machine?**
 8. **Para que serve um API Gateway?**
+9. **O que são Feature Flags e por que são importantes?** 🆕
+10. **Quando usar GraphQL vs REST?** 🆕
+11. **Qual a diferença entre CQS e CQRS?** 🆕
+12. **O que é BFF (Backend for Frontend)?** 🆕
 
 ---
 
 > **Próximo módulo:** [Módulo 7 - Testes](MODULO_07_TESTES.md)
+
