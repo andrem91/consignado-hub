@@ -273,10 +273,22 @@ Operação que pode ser executada múltiplas vezes com mesmo resultado. Importan
 
 ---
 
-### 26. O que é Event Sourcing?
+### 26. O que é Event Sourcing + Ledger?
 
 **Resposta:**
 Armazena eventos em vez do estado atual. Estado é reconstruído reproduzindo eventos.
+
+**No contexto financeiro (Ledger):**
+- **Evento de negócio:** "ContratoAverbado" (o que aconteceu)
+- **Evento de saldo:** "LancamentoContabil" (prova matemática)
+
+```java
+// Se saldoAnterior + valor = saldoNovo → sistema está íntegro
+```
+
+**Quando usar:**
+- ✅ Contratos, pagamentos (precisa auditoria)
+- ❌ Cadastros (complexidade desnecessária)
 
 **Vantagens:** Histórico completo, auditoria, debug
 **Desvantagens:** Complexidade, eventual consistency
@@ -300,6 +312,63 @@ Coordena transações distribuídas como sequência de transações locais. Cada
 Cluster de entidades tratadas como unidade. Aggregate Root é único ponto de entrada.
 
 **Exemplo:** Order (root) contém OrderItems. Nunca acessar OrderItem diretamente.
+
+---
+
+### 29. O que são Feature Flags?
+
+**Resposta:**
+Ligar/desligar funcionalidades sem redeploy. 
+
+**Uso em bancos:**
+1. Código vai para produção DESLIGADO
+2. Liga para 1% dos usuários (Canary)
+3. Se OK: 10%, 50%, 100%
+4. Se ERRO: Kill Switch
+
+**Ferramentas:** LaunchDarkly, Spring Cloud Config, Flipper
+
+---
+
+### 30. Qual a diferença entre CQS e CQRS?
+
+**Resposta:**
+
+| CQS | CQRS |
+|-----|------|
+| Interfaces separadas (mesmo banco) | Bancos separados (read/write) |
+| `CadastrarClienteUseCase` + `BuscarClienteQuery` | Write Model + Read Model |
+| Complexidade baixa | Complexidade alta |
+
+**Use CQS** para clareza no código, **CQRS** só quando tiver problemas de performance específicos.
+
+---
+
+### 31. O que é BFF (Backend for Frontend)?
+
+**Resposta:**
+API específica por tipo de cliente:
+- **Mobile BFF:** JSONs pequenos, dados otimizados
+- **Web BFF:** Tabelas complexas
+- **Desktop BFF:** Dados brutos
+
+**Benefício:** Cada frontend recebe exatamente o que precisa.
+
+**GraphQL é comum em BFFs** - permite que cliente peça campos específicos.
+
+---
+
+### 32. Quando usar GraphQL vs REST?
+
+**Resposta:**
+
+| REST | GraphQL |
+|------|---------|
+| Domain APIs (core) | Experience APIs (BFF) |
+| Contratos rígidos | Flexibilidade no cliente |
+| Múltiplas chamadas | 1 chamada (resolve N+1 no front) |
+
+**Padrão de mercado:** Core em REST, BFF em GraphQL.
 
 ---
 

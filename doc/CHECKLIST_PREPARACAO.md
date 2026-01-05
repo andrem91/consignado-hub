@@ -52,6 +52,9 @@ Checklist de auto-avaliação antes de entrevistas. Marque os itens que você do
 - [ ] Explico Circuit Breaker e quando usar
 - [ ] Entendo Kafka (producer/consumer)
 - [ ] Conheço conceitos de DDD (Aggregate, Value Object)
+- [ ] Explico diferença entre CQS e CQRS 🆕
+- [ ] Sei o que são Feature Flags e por que usar 🆕
+- [ ] Entendo BFF (Backend for Frontend) 🆕
 
 ### DevOps
 - [ ] Escrevo Dockerfile para Spring Boot
@@ -64,9 +67,11 @@ Checklist de auto-avaliação antes de entrevistas. Marque os itens que você do
 
 - [ ] Contribuí para projetos open source
 - [ ] Tenho certificação Oracle/Spring
-- [ ] Implementei Event Sourcing ou Saga
+- [ ] Implementei Event Sourcing + Ledger para conciliação 🆕
 - [ ] Fiz performance tuning (profiling, conexões)
 - [ ] Conheço Kubernetes básico
+- [ ] Implementei BFF com GraphQL 🆕
+- [ ] Usei Feature Flags em produção (LaunchDarkly) 🆕
 
 ---
 
