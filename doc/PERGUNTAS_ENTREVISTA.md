@@ -273,25 +273,37 @@ Operação que pode ser executada múltiplas vezes com mesmo resultado. Importan
 
 ---
 
-### 26. O que é Event Sourcing + Ledger?
+### 26. O que é Event Sourcing + Ledger + Partidas Dobradas?
 
 **Resposta:**
-Armazena eventos em vez do estado atual. Estado é reconstruído reproduzindo eventos.
+Padrão financeiro que combina Event Sourcing com contabilidade tradicional.
 
-**No contexto financeiro (Ledger):**
-- **Evento de negócio:** "ContratoAverbado" (o que aconteceu)
-- **Evento de saldo:** "LancamentoContabil" (prova matemática)
+**Partidas Dobradas (Double-Entry Bookkeeping):**
+> *"Para todo Débito existe um Crédito de igual valor."*
 
 ```java
-// Se saldoAnterior + valor = saldoNovo → sistema está íntegro
+// TransacaoContabil valida que Débito = Crédito
+TransacaoContabil tx = new TransacaoContabil(List.of(
+    new Lancamento(CARTEIRA_EMPRESTIMOS, DEBITO, R$1000),
+    new Lancamento(OBRIGACOES_LIBERAR, CREDITO, R$1000)
+)); // Soma = 0 ✓
+```
+
+**Plano de Contas:**
+```java
+enum ContaContabil {
+    ATIVO_CAIXA,               // Dinheiro do banco
+    ATIVO_CARTEIRA_CONSIGNADO, // Empréstimos a receber
+    PASSIVO_OBRIGACOES_LIBERAR,// Conta transitória
+    RECEITA_JUROS              // Lucro do banco
+}
 ```
 
 **Quando usar:**
-- ✅ Contratos, pagamentos (precisa auditoria)
+- ✅ Contratos, pagamentos (precisa auditoria e conciliação)
 - ❌ Cadastros (complexidade desnecessária)
 
-**Vantagens:** Histórico completo, auditoria, debug
-**Desvantagens:** Complexidade, eventual consistency
+**Argumento de entrevista:** *"Apliquei Partidas Dobradas apenas no módulo financeiro, como fazem grandes bancos."*
 
 ---
 

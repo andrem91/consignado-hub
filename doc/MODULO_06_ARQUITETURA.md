@@ -1061,108 +1061,94 @@ public class ClienteService implements
 ### Conceito
 Padrão usado em **sistemas financeiros** para garantir **conciliação contábil** e **auditoria completa**.
 
+### 📚 Partidas Dobradas (Double-Entry Bookkeeping)
+
+**Regra de Ouro:**
+> *"Para todo Débito existe um Crédito de igual valor. A soma total deve ser ZERO."*
+
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    EVENT SOURCING + LEDGER                                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  EVENTO DE NEGÓCIO (A causa)          EVENTO DE SALDO (O efeito)            │
-│  ┌───────────────────────────┐        ┌───────────────────────────┐         │
-│  │  ContratoAverbado         │───────►│  LancamentoContabil       │         │
-│  │  { valor: 1000.00 }       │        │  { saldoAnterior: 50000   │         │
-│  └───────────────────────────┘        │    saldoNovo: 51000 }     │         │
-│                                       └───────────────────────────┘         │
-│                                                                              │
-│  PROVA MATEMÁTICA: Se saldoAnterior + valor = saldoNovo, está correto!     │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│   Evento: ContratoAverbado (R$ 1.000)                                │
+│                                                                      │
+│   ┌──────────────────────────────────────────────────────────────┐   │
+│   │               TransacaoContabil                               │   │
+│   ├──────────────────────────────────────────────────────────────┤   │
+│   │  DÉBITO  Carteira_Emprestimos    R$ 1.000,00                 │   │
+│   │  CRÉDITO Obrigacoes_Liberar      R$ 1.000,00                 │   │
+│   ├──────────────────────────────────────────────────────────────┤   │
+│   │  VALIDAÇÃO: 1000 - 1000 = 0 ✓                                │   │
+│   └──────────────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-### Quando Usar?
+### 📋 Plano de Contas (Chart of Accounts)
 
-| Módulo | Usar Event Sourcing? | Por quê |
-|--------|---------------------|---------|
-| CustomerService | ❌ Não | Cadastro simples, não precisa auditoria contábil |
-| ContractService | ✅ Sim | Contratos financeiros precisam rastreabilidade |
-| PaymentService | ✅ Sim | Pagamentos precisam conciliação |
+```java
+public enum ContaContabil {
+    ATIVO_CAIXA("1.1.01", "Caixa", TipoConta.ATIVO),
+    ATIVO_CARTEIRA_CONSIGNADO("1.2.01", "Carteira de Empréstimos", TipoConta.ATIVO),
+    PASSIVO_OBRIGACOES_LIBERAR("2.1.01", "Obrigações a Liberar", TipoConta.PASSIVO),
+    RECEITA_JUROS("4.1.01", "Receita de Juros", TipoConta.RECEITA);
+}
+
+public enum TipoConta { ATIVO, PASSIVO, RECEITA, DESPESA }
+```
+
+### 🔄 Fluxo de Eventos Contábeis
+
+**Evento 1: ContratoAverbado**
+```
+Débito:  ATIVO_CARTEIRA_CONSIGNADO  R$ 1.000 (ativo ↑)
+Crédito: PASSIVO_OBRIGACOES_LIBERAR R$ 1.000 (passivo ↑)
+```
+
+**Evento 2: TEDEnviada**
+```
+Débito:  PASSIVO_OBRIGACOES_LIBERAR R$ 1.000 (passivo ↓)
+Crédito: ATIVO_CAIXA                R$ 1.000 (ativo ↓)
+```
+
+**Evento 3: ParcelaRecebida** (R$ 80 principal + R$ 20 juros)
+```
+Débito:  ATIVO_CAIXA                R$ 100 (entrou)
+Crédito: ATIVO_CARTEIRA             R$  80 (dívida ↓)
+Crédito: RECEITA_JUROS              R$  20 (lucro ↑)
+```
 
 ### Implementação
 
 ```java
-// Evento de Negócio (o que aconteceu)
-public record ContratoAverbado(
-    ContratoId id,
-    CPF cpf,
-    Dinheiro valorContratado,
-    TaxaJuros taxa,
-    PrazoParcela prazo,
-    LocalDateTime momento
-) implements DomainEvent {}
-
-// Evento de Saldo (prova matemática)
-public record LancamentoContabil(
-    ContratoId contratoId,
-    String contaDebito,      // "Ativo_Emprestimos"
-    String contaCredito,     // "Caixa"
-    Dinheiro valor,
-    Dinheiro saldoAnterior,
-    Dinheiro saldoNovo,      // saldoAnterior + valor
-    LocalDateTime momento
-) implements DomainEvent {}
-```
-
-### Fluxo com Kafka
-
-```java
-// ContractService publica evento de negócio
-@Service
-public class ContractEventPublisher {
+// Transação com validação
+public class TransacaoContabil {
+    private final List<Lancamento> lancamentos;
     
-    private final KafkaTemplate<String, DomainEvent> kafka;
-    
-    public void publish(ContratoAverbado evento) {
-        kafka.send("contratos-topic", evento.id().toString(), evento);
+    public TransacaoContabil(List<Lancamento> lancamentos) {
+        validarPartidasDobradas(lancamentos);
+        this.lancamentos = List.copyOf(lancamentos);
     }
-}
-
-// LedgerService escuta e cria evento de saldo
-@Service
-public class LedgerEventListener {
     
-    @KafkaListener(topics = "contratos-topic")
-    public void onContratoAverbado(ContratoAverbado evento) {
-        Dinheiro saldoAtual = contaRepository.getSaldo("Ativo_Emprestimos");
-        
-        LancamentoContabil lancamento = new LancamentoContabil(
-            evento.id(),
-            "Ativo_Emprestimos",
-            "Caixa",
-            evento.valorContratado(),
-            saldoAtual,
-            saldoAtual.somar(evento.valorContratado()),
-            LocalDateTime.now()
-        );
-        
-        eventStore.append(lancamento);
-        kafka.send("ledger-topic", lancamento);
+    private void validarPartidasDobradas(List<Lancamento> lancamentos) {
+        BigDecimal debito = somar(DEBITO);
+        BigDecimal credito = somar(CREDITO);
+        if (debito.compareTo(credito) != 0) {
+            throw new ContabilidadeDesbalanceadaException("...");
+        }
     }
 }
 ```
 
-### Benefícios
+### Quando Usar?
 
-| Benefício | Descrição |
-|-----------|-----------|
-| **Auditoria Completa** | Sabe exatamente o que aconteceu e quando |
-| **Conciliação** | Prova matemática de que saldos estão corretos |
-| **Replay** | Pode reconstruir estado a partir dos eventos |
-| **Debug** | Fácil identificar onde ocorreu erro |
+| Módulo | Usar? | Justificativa |
+|--------|-------|---------------|
+| CustomerService | ❌ | Cadastro simples |
+| ContractService | ✅ | Contratos precisam rastreabilidade |
+| LedgerService | ✅ | Conciliação contábil |
 
 ### Argumento de Entrevista
 
-> *"Não usei Event Sourcing em todo o sistema porque seria complexidade desnecessária. 
-> Apliquei apenas no módulo Financeiro/Contratos para garantir conciliação contábil, 
-> exatamente como se faz em grandes bancos."*
+> *"Apliquei Event Sourcing + Partidas Dobradas apenas no módulo Financeiro para 
+> conciliação contábil, exatamente como se faz em grandes bancos."*
 
 ---
 

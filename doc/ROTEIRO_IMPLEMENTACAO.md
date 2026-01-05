@@ -126,66 +126,193 @@ CQS (Vamos usar):                 CQRS (Não usar):
 |--------|-------------|---------------|
 | **CustomerService** | DDD Clássico | Cadastro não precisa auditoria contábil |
 | **ContractService** | Event Sourcing + Ledger | Contrato financeiro PRECISA rastreabilidade |
+| **LedgerService** | Partidas Dobradas | Conciliação contábil profissional |
 
 #### Por que usar apenas no ContractService?
 
 > *"Não usei Event Sourcing em tudo porque seria complexidade desnecessária. 
 > Usei apenas no módulo Financeiro/Contratos para garantir a conciliação contábil."*
 
-#### Estrutura de Eventos
+---
+
+### 📚 Partidas Dobradas (Double-Entry Bookkeeping)
+
+**Regra de Ouro da Contabilidade:**
+> *"Para todo Débito existe um Crédito de igual valor. A soma total deve ser ZERO."*
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                     CONTRATO SERVICE (Sprint 4)                          │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│   EVENTOS DE NEGÓCIO (O que aconteceu / A causa)                        │
-│   ┌─────────────────────────────────────────────────────────────────┐   │
-│   │  ContratoAverbado { id, cpf, valor, taxa, prazo, momento }      │   │
-│   │  ParcelaRecebida { contratoId, parcela, valor, momento }        │   │
-│   │  ContratoQuitado { contratoId, valorTotal, momento }            │   │
-│   └─────────────────────────────────────────────────────────────────┘   │
-│                                │                                         │
-│                                ▼                                         │
-│   EVENTOS DE SALDO (Prova matemática / O efeito)                        │
-│   ┌─────────────────────────────────────────────────────────────────┐   │
-│   │  LancamentoContabil {                                           │   │
-│   │      contratoId,                                                │   │
-│   │      contaDebito: "Ativo_Emprestimos",                          │   │
-│   │      contaCredito: "Caixa",                                     │   │
-│   │      valor,                                                     │   │
-│   │      saldoAnterior,                                             │   │
-│   │      saldoNovo,     // ← Snapshot para validação                │   │
-│   │      momento                                                    │   │
-│   │  }                                                              │   │
-│   └─────────────────────────────────────────────────────────────────┘   │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    PARTIDAS DOBRADAS                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   Evento: ContratoAverbado (R$ 1.000)                                       │
+│                                                                              │
+│   ┌────────────────────────────────────────────────────────────────────┐    │
+│   │                    TransacaoContabil                                │    │
+│   ├────────────────────────────────────────────────────────────────────┤    │
+│   │  Lançamento 1: DÉBITO  Carteira_Emprestimos    R$ 1.000,00         │    │
+│   │  Lançamento 2: CRÉDITO Obrigacoes_Liberar      R$ 1.000,00         │    │
+│   ├────────────────────────────────────────────────────────────────────┤    │
+│   │  VALIDAÇÃO: Débito (1000) - Crédito (1000) = 0 ✓                   │    │
+│   └────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Implementação Java (Sprint 4)
+---
+
+### 📋 Plano de Contas (Chart of Accounts)
 
 ```java
-// Evento de Negócio
-public record ContratoAverbado(
-    ContratoId id,
-    CPF cpf,
-    Dinheiro valorContratado,
-    TaxaJuros taxa,
-    PrazoParcela prazo,
-    LocalDateTime momento
-) implements DomainEvent {}
+// Enum com as contas contábeis do sistema
+public enum ContaContabil {
+    
+    // ATIVO (recursos do banco)
+    ATIVO_CAIXA("1.1.01", "Caixa", TipoConta.ATIVO),
+    ATIVO_CARTEIRA_CONSIGNADO("1.2.01", "Carteira de Empréstimos", TipoConta.ATIVO),
+    
+    // PASSIVO (obrigações do banco)
+    PASSIVO_OBRIGACOES_LIBERAR("2.1.01", "Obrigações a Liberar", TipoConta.PASSIVO),
+    
+    // RECEITA (lucro do banco)
+    RECEITA_JUROS("4.1.01", "Receita de Juros", TipoConta.RECEITA),
+    RECEITA_TARIFAS("4.1.02", "Receita de Tarifas", TipoConta.RECEITA);
+    
+    private final String codigo;
+    private final String descricao;
+    private final TipoConta tipo;
+}
 
-// Evento de Saldo (Ledger)
-public record LancamentoContabil(
-    ContratoId contratoId,
-    String contaDebito,
-    String contaCredito,
-    Dinheiro valor,
-    Dinheiro saldoAnterior,
-    Dinheiro saldoNovo,
-    LocalDateTime momento
-) implements DomainEvent {}
+public enum TipoConta {
+    ATIVO,    // Débito aumenta, Crédito diminui
+    PASSIVO,  // Crédito aumenta, Débito diminui
+    RECEITA,  // Crédito aumenta
+    DESPESA   // Débito aumenta
+}
+```
+
+---
+
+### 🔄 Fluxo de Eventos Contábeis
+
+#### Cenário: Contratação de R$ 1.000,00
+
+**Evento 1: ContratoAverbado** (averbação aprovada)
+```
+Débito:  ATIVO_CARTEIRA_CONSIGNADO  R$ 1.000,00 (ativo ↑)
+Crédito: PASSIVO_OBRIGACOES_LIBERAR R$ 1.000,00 (passivo ↑)
+```
+
+**Evento 2: TEDEnviada** (dinheiro liberado)
+```
+Débito:  PASSIVO_OBRIGACOES_LIBERAR R$ 1.000,00 (passivo ↓)
+Crédito: ATIVO_CAIXA                R$ 1.000,00 (ativo ↓)
+```
+
+**Evento 3: ParcelaRecebida** (cliente pagou R$ 100: R$ 80 principal + R$ 20 juros)
+```
+Débito:  ATIVO_CAIXA                R$ 100,00 (entrou dinheiro)
+Crédito: ATIVO_CARTEIRA_CONSIGNADO  R$  80,00 (dívida ↓)
+Crédito: RECEITA_JUROS              R$  20,00 (lucro ↑)
+```
+
+---
+
+### 💻 Implementação Java (Sprint 4)
+
+```java
+// Tipo de movimento contábil
+public enum TipoLancamento {
+    DEBITO,
+    CREDITO
+}
+
+// Lançamento atômico (Value Object)
+public record Lancamento(
+    ContaContabil conta,
+    TipoLancamento tipo,
+    Dinheiro valor
+) {}
+
+// Transação Contábil (Partida Dobrada)
+public class TransacaoContabil {
+    
+    private final UUID id;
+    private final ContratoId contratoId;
+    private final String descricao;
+    private final List<Lancamento> lancamentos;
+    private final LocalDateTime momento;
+    
+    public TransacaoContabil(ContratoId contratoId, String descricao, 
+                              List<Lancamento> lancamentos) {
+        validarPartidasDobradas(lancamentos);  // ← Invariante
+        this.id = UUID.randomUUID();
+        this.contratoId = contratoId;
+        this.descricao = descricao;
+        this.lancamentos = List.copyOf(lancamentos);
+        this.momento = LocalDateTime.now();
+    }
+    
+    // INVARIANTE: Débito DEVE ser igual a Crédito
+    private void validarPartidasDobradas(List<Lancamento> lancamentos) {
+        BigDecimal totalDebito = lancamentos.stream()
+            .filter(l -> l.tipo() == TipoLancamento.DEBITO)
+            .map(l -> l.valor().valor())
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+        BigDecimal totalCredito = lancamentos.stream()
+            .filter(l -> l.tipo() == TipoLancamento.CREDITO)
+            .map(l -> l.valor().valor())
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+        if (totalDebito.compareTo(totalCredito) != 0) {
+            throw new ContabilidadeDesbalanceadaException(
+                "Débito (" + totalDebito + ") != Crédito (" + totalCredito + ")"
+            );
+        }
+    }
+}
+
+// Factory para criar transações comuns
+public class TransacaoContabilFactory {
+    
+    public static TransacaoContabil contratoAverbado(ContratoId id, Dinheiro valor) {
+        return new TransacaoContabil(id, "Contrato Averbado", List.of(
+            new Lancamento(ContaContabil.ATIVO_CARTEIRA_CONSIGNADO, DEBITO, valor),
+            new Lancamento(ContaContabil.PASSIVO_OBRIGACOES_LIBERAR, CREDITO, valor)
+        ));
+    }
+    
+    public static TransacaoContabil tedEnviada(ContratoId id, Dinheiro valor) {
+        return new TransacaoContabil(id, "TED Enviada", List.of(
+            new Lancamento(ContaContabil.PASSIVO_OBRIGACOES_LIBERAR, DEBITO, valor),
+            new Lancamento(ContaContabil.ATIVO_CAIXA, CREDITO, valor)
+        ));
+    }
+    
+    public static TransacaoContabil parcelaRecebida(ContratoId id, 
+            Dinheiro principal, Dinheiro juros) {
+        Dinheiro total = principal.somar(juros);
+        return new TransacaoContabil(id, "Parcela Recebida", List.of(
+            new Lancamento(ContaContabil.ATIVO_CAIXA, DEBITO, total),
+            new Lancamento(ContaContabil.ATIVO_CARTEIRA_CONSIGNADO, CREDITO, principal),
+            new Lancamento(ContaContabil.RECEITA_JUROS, CREDITO, juros)
+        ));
+    }
+}
+```
+
+---
+
+### 🔍 Conciliação e Auditoria
+
+```java
+// Consultar saldo de uma conta
+public interface LedgerQuery {
+    Dinheiro saldoConta(ContaContabil conta);
+    List<Lancamento> extratoConta(ContaContabil conta, LocalDate inicio, LocalDate fim);
+    boolean verificarIntegridade();  // Soma de todos débitos = soma de todos créditos
+}
 ```
 
 #### Fluxo Kafka
@@ -193,10 +320,11 @@ public record LancamentoContabil(
 ```
 ContractService                    LedgerService
       │                                  │
-      │  ContratoAverbado                │
+      │  ContratoAverbadoEvent           │
       ├──────────────────────────────────►
-      │                                  │
-      │              LancamentoContabil  │
+      │                                  │ ← Cria TransacaoContabil
+      │                                  │ ← Valida Partidas Dobradas
+      │     TransacaoRegistradaEvent     │ ← Persiste no Event Store
       │◄──────────────────────────────────
       │                                  │
 ```
