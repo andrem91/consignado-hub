@@ -75,7 +75,8 @@
 
 | ID | Sprint | Tipo | Status | Descrição |
 |----|--------|------|--------|-----------|
-| - | - | - | - | Nenhum incidente ativo |
+| INC-001 | 0 | 🐛 Bug | N/A | CPF zeros - código já correto |
+| INC-002 | 0 | 📋 Feature | Pendente | Idade máxima no contrato |
 
 ---
 
