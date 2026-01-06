@@ -88,35 +88,46 @@ Sprint 7+ ░░░░░░░░░░░░░░░░░░░░░░░�
 
 ### ✅ Planejados para o Projeto
 
-| Pattern | Sprint | O que é | Por que usar |
-|---------|--------|---------|--------------|
-| **CQS** | 1+ | Separar interfaces Read/Write (mesmo banco) | Clareza no código, prepara para CQRS |
-| **Event Sourcing + Ledger** | 4 | Eventos de negócio + eventos de saldo | Conciliação contábil, auditoria |
-| **Feature Flags** | 6 | Ligar/desligar features sem redeploy | Deploy seguro, rollout gradual |
-| **BFF + GraphQL** | 7 | API específica para Mobile/Web | Experience API vs Domain API |
-| **Serverless** | 8 | Lambda para Mock Dataprev | Simula webhook externo |
-| **Canary Release** | 8 | Deploy gradual (1% → 100%) | Validar com % de usuários |
+| Pattern | Sprint | Módulo | Por que usar |
+|---------|--------|--------|--------------|
+| **CQS** | 1+ | CustomerService | Interfaces separadas, mesmo banco |
+| **CQRS Real** | 4 | ContractService | Event Sourcing implica bancos separados |
+| **Event Sourcing + Ledger** | 4 | ContractService, LedgerService | Conciliação contábil, auditoria |
+| **Feature Flags** | 6 | Todos | Deploy seguro, rollout gradual |
+| **BFF + GraphQL** | 7 | Mobile BFF | Experience API vs Domain API |
+| **Serverless** | 8 | Mock Dataprev | Simula webhook externo |
+
+### ⚠️ Esclarecimento: CQS vs CQRS
+
+| Módulo | Padrão | Banco Write | Banco Read | CQRS? |
+|--------|--------|-------------|------------|-------|
+| **CustomerService** | CQS | PostgreSQL | PostgreSQL | ❌ Não |
+| **ContractService** | **CQRS** | DynamoDB | PostgreSQL (Projeção) | ✅ **Sim** |
+| **LedgerService** | **CQRS** | DynamoDB | PostgreSQL (Projeção) | ✅ **Sim** |
+
+> **Por que CQRS no ContractService?** Event Sourcing + DynamoDB implica CQRS. 
+> DynamoDB é ruim para queries complexas, então projetamos dados para PostgreSQL.
 
 ### ❌ Não Planejados (mas saiba explicar)
 
 | Pattern | Por que não | Alternativa |
 |---------|-------------|-------------|
-| **CQRS Puro** | Requer bancos separados | CQS lógico (mesma infra) |
+| **CQRS em Tudo** | Over-engineering para cadastro | CQS no CustomerService |
 | **Service Mesh** | Muito pesado localmente | Mencionar Istio, não implementar |
 | **Strangler Fig** | Projeto greenfield (sem legado) | Saber explicar em entrevista |
 
-### 💡 CQS vs CQRS
+### 💡 Diagrama: CQS (CustomerService) vs CQRS (ContractService)
 
 ```
-CQS (Vamos usar):                 CQRS (Não usar):
+CustomerService (CQS):             ContractService (CQRS):
 ┌─────────────────────────┐       ┌─────────────────────────────────┐
-│   CadastrarClienteUseCase │       │   Write Model    │   Read Model │
-│   (Command - Write)       │       │   PostgreSQL     │   MongoDB    │
-├───────────────────────────┤       │       ↓          │       ↓      │
-│   BuscarClienteQuery      │       │   Event Bus  ←───────────────── │
-│   (Query - Read)          │       └─────────────────────────────────┘
-└───────────────────────────┘       Complexidade: 🔴 Alta
-     ↓ Mesmo banco ↓                Complexidade: 🟢 Baixa (CQS)
+│   CadastrarClienteUseCase │       │   WRITE MODEL   │   READ MODEL  │
+│   (Command - Write)       │       │   ┌─────────┐   │   ┌─────────┐ │
+├───────────────────────────┤       │   │DynamoDB │   │   │Postgres │ │
+│   BuscarClienteQuery      │       │   │ Events  │──►│   │  Views  │ │
+│   (Query - Read)          │       │   └─────────┘   │   └─────────┘ │
+└───────────────────────────┘       └─────────────────────────────────┘
+     ↓ Mesmo banco ↓                     Projeção via Kafka
     PostgreSQL
 ```
 

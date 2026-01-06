@@ -352,7 +352,14 @@ Ligar/desligar funcionalidades sem redeploy.
 | `CadastrarClienteUseCase` + `BuscarClienteQuery` | Write Model + Read Model |
 | Complexidade baixa | Complexidade alta |
 
-**Use CQS** para clareza no código, **CQRS** só quando tiver problemas de performance específicos.
+**No ConsignadoHub:**
+
+| Módulo | Padrão | Banco Write | Banco Read |
+|--------|--------|-------------|------------|
+| CustomerService | **CQS** | PostgreSQL | PostgreSQL |
+| ContractService | **CQRS** | DynamoDB | PostgreSQL (Projeção) |
+
+**Argumento:** *"Usei CQS no cadastro (simples) e CQRS no módulo financeiro porque Event Sourcing com DynamoDB implica bancos separados para escrita e leitura."*
 
 ---
 
