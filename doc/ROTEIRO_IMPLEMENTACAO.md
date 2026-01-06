@@ -74,11 +74,13 @@ Sprint 7+ ░░░░░░░░░░░░░░░░░░░░░░░�
 | 1 | Customer básico | 🐛 N+1 query | CQS (interfaces separadas) |
 | 2 | Simulation básica | 🐛 IOF errado | - |
 | 3 | Kafka + Credit | 🔴 Duplicação | Idempotência |
-| 4 | Loan + Averbação | 🔴 Circuit breaker | Resilience4j, Saga |
+| 4 | Loan + **LocalStack/DynamoDB** | 🔴 Circuit breaker | Event Sourcing, Saga |
 | 5 | Payment | 📋 Margem config | External config |
 | 6 | Gateway + **Feature Flags** | 📋 Multi-canal | Strategy, **LaunchDarkly** |
 | 7 | Docker/K8s + **BFF GraphQL** | - | **Spring for GraphQL** |
-| 8 | AWS LocalStack | - | **Lambda Mock Dataprev** |
+| 8 | AWS Lambda | - | **Lambda Mock Dataprev** |
+
+> **Nota:** LocalStack movido para Sprint 4 para suportar DynamoDB Event Store.
 
 ---
 
@@ -500,8 +502,58 @@ public void averbarContrato(UUID contratoId) {
 > DynamoDB para Event Store (append-only, barato, escala infinita).
 > Exatamente como Nubank e Itaú fazem em produção."*
 
-
 ---
+
+### 🐳 Docker Compose LocalStack (Sprint 4)
+
+```yaml
+# docker-compose.yml (adicionar na Sprint 4)
+services:
+  # ... postgres, kafka (já existentes) ...
+  
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566"  # Gateway para todos os serviços AWS
+    environment:
+      - SERVICES=dynamodb
+      - DEBUG=1
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      - "./localstack-init:/etc/localstack/init/ready.d"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+```
+
+```bash
+# localstack-init/init-dynamodb.sh
+#!/bin/bash
+awslocal dynamodb create-table \
+  --table-name consignado-events \
+  --attribute-definitions \
+    AttributeName=pk,AttributeType=S \
+    AttributeName=sk,AttributeType=S \
+  --key-schema \
+    AttributeName=pk,KeyType=HASH \
+    AttributeName=sk,KeyType=RANGE \
+  --billing-mode PAY_PER_REQUEST
+```
+
+#### Configuração Spring Boot
+
+```yaml
+# application-local.yml
+spring:
+  cloud:
+    aws:
+      dynamodb:
+        endpoint: http://localhost:4566
+      credentials:
+        access-key: test
+        secret-key: test
+      region:
+        static: us-east-1
+```
 
 ## 🔧 Dívida Técnica Planejada
 

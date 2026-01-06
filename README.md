@@ -95,13 +95,16 @@ Use o comando: `/modo-mentor`
 | **LoanService** | Event Sourcing + Ledger | Conciliação contábil financeira |
 | **LedgerService** | Partidas Dobradas | Eventos de saldo para auditoria |
 
-### 🗄️ Decisão de Persistência (Arquitetura Híbrida)
+### 🗄️ Persistência Poliglota (Polyglot Persistence)
+
+> *"Use o banco certo para cada tipo de dado"*
 
 | Dado | Banco | Por quê |
 |------|-------|---------|
 | Clientes, Contratos (estado) | **PostgreSQL** | ACID, JOINs, queries complexas |
 | Saldos Contábeis | **PostgreSQL** | Transações ACID |
 | **Event Store (eventos)** | **DynamoDB** | Append-only, escala infinita, barato |
+| Cache | **Redis** | Performance, sessões |
 
 ---
 
@@ -110,8 +113,10 @@ Use o comando: `/modo-mentor`
 | Categoria | Tecnologias |
 |-----------|-------------|
 | **Backend** | Java 21, Spring Boot 3.5, Spring Cloud |
-| **Arquitetura** | DDD, Hexagonal, Event Sourcing (Ledger), CQS |
-| **Banco de Dados** | PostgreSQL, **DynamoDB (Event Store)**, Redis |
+| **Arquitetura** | DDD, Hexagonal, Event Sourcing (Ledger), CQS, **Persistência Poliglota** |
+| **SQL** | PostgreSQL (estado, transações ACID) |
+| **NoSQL** | **Amazon DynamoDB** (Event Store) |
+| **Cache** | Redis |
 | **Mensageria** | Apache Kafka |
 | **Patterns** | Feature Flags, BFF + GraphQL, Saga, Circuit Breaker, Partidas Dobradas |
 | **DevOps** | Docker, GitHub Actions, SonarCloud |
