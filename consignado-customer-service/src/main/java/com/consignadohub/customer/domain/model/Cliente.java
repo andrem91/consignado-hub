@@ -32,6 +32,16 @@ public class Cliente {
         this.telefone = telefone;
     }
 
+    private Cliente(ClienteId id, CPF cpf, String nome, DataNascimento dataNascimento,
+                    Email email, Telefone telefone) {
+        this.id = id;
+        this.cpf = cpf;
+        this.nome = nome;
+        this.dataNascimento = dataNascimento;
+        this.email = email;
+        this.telefone = telefone;
+    }
+
     public void adicionarBeneficio(Beneficio beneficio) {
         if (beneficio == null) throw new InvalidClienteException("Benefício não pode ser nulo");
         this.beneficios.add(beneficio);
@@ -45,6 +55,10 @@ public class Cliente {
     
     public List<Beneficio> getBeneficios() {
         return Collections.unmodifiableList(beneficios);
+    }
+
+    public static Cliente reconstituir(ClienteId id, CPF cpf, String nome, DataNascimento dataNascimento, Email email, Telefone telefone) {
+        return new Cliente(id, cpf, nome, dataNascimento, email, telefone);
     }
 
 }
