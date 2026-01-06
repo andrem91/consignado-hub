@@ -324,10 +324,181 @@ ContractService                    LedgerService
       ├──────────────────────────────────►
       │                                  │ ← Cria TransacaoContabil
       │                                  │ ← Valida Partidas Dobradas
-      │     TransacaoRegistradaEvent     │ ← Persiste no Event Store
+      │     TransacaoRegistradaEvent     │ ← Persiste no Event Store (DynamoDB)
       │◄──────────────────────────────────
       │                                  │
 ```
+
+---
+
+### 🗄️ DynamoDB Event Store (Sprint 4)
+
+#### Decisão de Persistência
+
+| Dado | Banco | Justificativa |
+|------|-------|---------------|
+| **Clientes** | PostgreSQL | Queries complexas, JOINs, ACID |
+| **Contratos (estado)** | PostgreSQL | Transações, relacionamentos |
+| **Saldos Contábeis** | PostgreSQL | ACID para conciliação |
+| **Eventos (histórico)** | **DynamoDB** | Append-only, escala infinita, barato |
+
+#### Por que DynamoDB para Event Store?
+
+| Aspecto | PostgreSQL | DynamoDB |
+|---------|------------|----------|
+| **Padrão de acesso** | Queries complexas | Key-value (PK + SK) |
+| **Escalabilidade** | Manual (DBA) | Automática |
+| **Custo** | Servidor fixo | Pay-per-use |
+| **Append-only** | 🟡 Funciona | ✅ Perfeito |
+
+#### Modelagem DynamoDB
+
+```
+Tabela: consignado-events
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ PK (Partition Key)         │ SK (Sort Key)    │ Attributes                  │
+├────────────────────────────┼──────────────────┼─────────────────────────────┤
+│ CONTRATO#550e8400-e29b...  │ 0000000001       │ eventType, timestamp, payload│
+│ CONTRATO#550e8400-e29b...  │ 0000000002       │ eventType, timestamp, payload│
+│ CONTRATO#550e8400-e29b...  │ 0000000003       │ eventType, timestamp, payload│
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Implementação Java
+
+```java
+// Entidade DynamoDB
+@DynamoDbBean
+public class EventStoreModel {
+
+    private String pk;           // CONTRATO#uuid
+    private String sk;           // 0000000001 (versão formatada)
+    private String eventType;    // ContratoAverbado
+    private Instant timestamp;
+    private String payload;      // JSON do evento
+    private String metadata;     // { "usuario": "andre" }
+
+    @DynamoDbPartitionKey
+    public String getPk() { return pk; }
+    
+    @DynamoDbSortKey
+    public String getSk() { return sk; }
+}
+
+// Repositório Event Store
+@Repository
+@RequiredArgsConstructor
+public class DynamoEventStore {
+
+    private final DynamoDbEnhancedClient dynamoClient;
+    private final ObjectMapper objectMapper;
+
+    public void salvarEventos(UUID aggregateId, List<DomainEvent> eventos, int versaoAtual) {
+        var table = getTable();
+        
+        List<TransactWriteItem> items = new ArrayList<>();
+        
+        for (DomainEvent evento : eventos) {
+            versaoAtual++;
+            
+            EventStoreModel model = new EventStoreModel();
+            model.setPk("CONTRATO#" + aggregateId);
+            model.setSk(String.format("%010d", versaoAtual));  // 0000000001
+            model.setEventType(evento.getClass().getSimpleName());
+            model.setTimestamp(evento.occurredAt());
+            model.setPayload(toJson(evento));
+
+            // Transação atômica com verificação de duplicata
+            items.add(TransactWriteItem.builder()
+                .put(Put.builder()
+                    .tableName("consignado-events")
+                    .item(toAttributeMap(model))
+                    .conditionExpression("attribute_not_exists(pk)")
+                    .build())
+                .build());
+        }
+        
+        dynamoClient.transactWriteItems(TransactWriteItemsRequest.builder()
+            .transactItems(items)
+            .build());
+    }
+
+    public List<DomainEvent> carregarEventos(UUID aggregateId) {
+        var table = getTable();
+        
+        // Query ordenada por SK automaticamente
+        Key key = Key.builder()
+            .partitionValue("CONTRATO#" + aggregateId)
+            .build();
+        
+        return table.query(r -> r.queryConditional(
+                QueryConditional.keyEqualTo(key)))
+            .items().stream()
+            .map(this::toDomainEvent)
+            .toList();
+    }
+}
+```
+
+#### Uso no ContractService
+
+```java
+public void averbarContrato(UUID contratoId) {
+    // 1. Carrega histórico do DynamoDB (Event Sourcing)
+    List<DomainEvent> historico = dynamoEventStore.carregarEventos(contratoId);
+    
+    // 2. Reconstroi o Contrato em memória (Replay)
+    Contrato contrato = Contrato.reconstruir(historico);
+    
+    // 3. Executa regra de negócio (gera novo evento)
+    contrato.averbar();
+    
+    // 4. Salva novo evento no DynamoDB
+    dynamoEventStore.salvarEventos(
+        contrato.getId(), 
+        contrato.getChanges(), 
+        contrato.getVersion()
+    );
+    
+    // 5. Publica evento no Kafka para outros serviços
+    kafkaTemplate.send("contratos-topic", contrato.getChanges());
+}
+```
+
+#### Arquitetura Híbrida Final
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ARQUITETURA HÍBRIDA                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   CustomerService        ContractService       LedgerService                │
+│   ┌────────────┐        ┌────────────┐        ┌────────────┐               │
+│   │ PostgreSQL │        │ PostgreSQL │        │ PostgreSQL │               │
+│   │ (Clientes) │        │ (Contratos)│        │ (Saldos)   │               │
+│   │  DDD + CQS │        │  + Estado  │        │  + ACID    │               │
+│   └────────────┘        └─────┬──────┘        └──────┬─────┘               │
+│                               │                       │                     │
+│                               ▼                       ▼                     │
+│                    ┌─────────────────────────────────────────┐             │
+│                    │            DynamoDB                      │             │
+│                    │       consignado-events                  │             │
+│                    │   (Event Store - Append Only)           │             │
+│                    └─────────────────────────────────────────┘             │
+│                                       │                                     │
+│                               ┌───────┴───────┐                            │
+│                               │ Apache Kafka  │                            │
+│                               └───────────────┘                            │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Argumento de Entrevista
+
+> *"Usei arquitetura híbrida: PostgreSQL para estado transacional (ACID),
+> DynamoDB para Event Store (append-only, barato, escala infinita).
+> Exatamente como Nubank e Itaú fazem em produção."*
 
 
 ---

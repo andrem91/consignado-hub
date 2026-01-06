@@ -93,7 +93,15 @@ Use o comando: `/modo-mentor`
 |--------|-------------|---------------|
 | **CustomerService** | DDD Clássico + CQS | Cadastro simples |
 | **LoanService** | Event Sourcing + Ledger | Conciliação contábil financeira |
-| **LedgerService** | Event Sourcing | Eventos de saldo para auditoria |
+| **LedgerService** | Partidas Dobradas | Eventos de saldo para auditoria |
+
+### 🗄️ Decisão de Persistência (Arquitetura Híbrida)
+
+| Dado | Banco | Por quê |
+|------|-------|---------|
+| Clientes, Contratos (estado) | **PostgreSQL** | ACID, JOINs, queries complexas |
+| Saldos Contábeis | **PostgreSQL** | Transações ACID |
+| **Event Store (eventos)** | **DynamoDB** | Append-only, escala infinita, barato |
 
 ---
 
@@ -103,11 +111,11 @@ Use o comando: `/modo-mentor`
 |-----------|-------------|
 | **Backend** | Java 21, Spring Boot 3.5, Spring Cloud |
 | **Arquitetura** | DDD, Hexagonal, Event Sourcing (Ledger), CQS |
-| **Banco de Dados** | PostgreSQL, Redis |
+| **Banco de Dados** | PostgreSQL, **DynamoDB (Event Store)**, Redis |
 | **Mensageria** | Apache Kafka |
-| **Patterns** | Feature Flags, BFF + GraphQL, Saga, Circuit Breaker |
+| **Patterns** | Feature Flags, BFF + GraphQL, Saga, Circuit Breaker, Partidas Dobradas |
 | **DevOps** | Docker, GitHub Actions, SonarCloud |
-| **Cloud** | AWS (LocalStack), Kubernetes, Terraform |
+| **Cloud** | AWS (LocalStack, DynamoDB), Kubernetes, Terraform |
 | **Testes** | JUnit 5, Mockito, TestContainers, WireMock |
 | **Observabilidade** | Prometheus, Grafana, Jaeger |
 
