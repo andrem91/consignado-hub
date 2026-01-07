@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidTelefoneException;
+import com.consignadohub.customer.domain.exception.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,6 +47,6 @@ public class TelefoneTest {
     @DisplayName("Não deve criar telefone com tamanho inválido")
     void naoDeveCriarInvalido(String numeroInvalido) {
         assertThatThrownBy(() -> new Telefone(numeroInvalido))
-                .isInstanceOf(InvalidTelefoneException.class);
+                .isInstanceOf(DomainException.class);
     }
 }

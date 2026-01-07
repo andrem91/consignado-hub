@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidPrazoParcelaException;
+import com.consignadohub.customer.domain.exception.DomainException;
 
 public record PrazoParcela(int meses) {
     public static final int MINIMO = 6;
@@ -8,11 +8,11 @@ public record PrazoParcela(int meses) {
 
     public PrazoParcela {
         if(meses < MINIMO) {
-            throw new InvalidPrazoParcelaException("Prazo mínimo é " + MINIMO + " meses");
+            throw DomainException.invalidField("PrazoParcela", "Mínimo é " + MINIMO + " meses");
         }
 
         if(meses > MAXIMO) {
-            throw new InvalidPrazoParcelaException("Prazo máximo é " + MAXIMO + " meses");
+            throw DomainException.invalidField("PrazoParcela", "Máximo é " + MAXIMO + " meses");
         }
     }
 

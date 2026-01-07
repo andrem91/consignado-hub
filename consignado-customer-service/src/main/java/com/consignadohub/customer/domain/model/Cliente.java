@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.model;
 
-import com.consignadohub.customer.domain.exception.InvalidClienteException;
+import com.consignadohub.customer.domain.exception.DomainException;
 import com.consignadohub.customer.domain.vo.*;
 import lombok.Getter;
 
@@ -20,9 +20,9 @@ public class Cliente {
     private final List<Beneficio> beneficios = new ArrayList<>();
 
     public Cliente(CPF cpf, String nome, DataNascimento dataNascimento, Email email, Telefone telefone) {
-        if (cpf == null) throw new InvalidClienteException("CPF é obrigatório");
-        if (nome == null || nome.isBlank()) throw new InvalidClienteException("Nome é obrigatório");
-        if (dataNascimento == null) throw new InvalidClienteException("Data de nascimento é obrigatória");
+        if (cpf == null) throw DomainException.required("CPF");
+        if (nome == null || nome.isBlank()) throw DomainException.required("Nome");
+        if (dataNascimento == null) throw DomainException.required("DataNascimento");
 
         this.id = ClienteId.novo();
         this.cpf = cpf;
@@ -43,7 +43,7 @@ public class Cliente {
     }
 
     public void adicionarBeneficio(Beneficio beneficio) {
-        if (beneficio == null) throw new InvalidClienteException("Benefício não pode ser nulo");
+        if (beneficio == null) throw DomainException.required("Benefício");
         this.beneficios.add(beneficio);
     }
 

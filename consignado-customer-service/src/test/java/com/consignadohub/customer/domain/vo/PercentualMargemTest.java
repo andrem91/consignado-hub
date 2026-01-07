@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidPercentualMargemException;
+import com.consignadohub.customer.domain.exception.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,13 +23,13 @@ public class PercentualMargemTest {
     @DisplayName("Não deve permitir valor negativo")
     void naoDevePermitirValorNegativo() {
         assertThatThrownBy(() -> PercentualMargem.of(new BigDecimal("-10")))
-                .isInstanceOf(InvalidPercentualMargemException.class);
+                .isInstanceOf(DomainException.class);
     }
 
     @Test
     @DisplayName("Não deve permitir valor maior que 100")
     void naoDevePermitirValorMaiorQue100() {
         assertThatThrownBy(() -> PercentualMargem.of(new BigDecimal("101")))
-                .isInstanceOf(InvalidPercentualMargemException.class);
+                .isInstanceOf(DomainException.class);
     }
 }

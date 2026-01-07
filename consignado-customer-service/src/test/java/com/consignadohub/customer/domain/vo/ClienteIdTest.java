@@ -1,5 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
+import com.consignadohub.customer.domain.exception.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,6 @@ public class ClienteIdTest {
     @DisplayName("Deve rejeitar UUID nulo")
     void deveRejeitarUUIDNulo() {
         assertThatThrownBy(() -> ClienteId.of(null))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(DomainException.class);
     }
 }

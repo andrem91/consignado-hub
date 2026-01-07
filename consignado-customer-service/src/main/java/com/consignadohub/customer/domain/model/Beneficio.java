@@ -1,12 +1,11 @@
 package com.consignadohub.customer.domain.model;
 
-import com.consignadohub.customer.domain.exception.InvalidBeneficioException;
+import com.consignadohub.customer.domain.exception.DomainException;
 import com.consignadohub.customer.domain.vo.Dinheiro;
 import com.consignadohub.customer.domain.vo.NumeroBeneficio;
 import com.consignadohub.customer.domain.vo.PercentualMargem;
 import lombok.Getter;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -25,13 +24,13 @@ public class Beneficio {
             Dinheiro valorMensal,
             LocalDate dataInicio
     ) {
-        if (numero == null) throw new InvalidBeneficioException("Número do benefício é obrigatório");
-        if (tipo == null) throw new InvalidBeneficioException("Tipo do benefício é obrigatório");
-        if (valorMensal == null) throw new InvalidBeneficioException("Valor do benefício é obrigatório");
-        if (dataInicio == null) throw new InvalidBeneficioException("Data de início do benefício é obrigatória");
+        if (numero == null) throw DomainException.required("Número do benefício");
+        if (tipo == null) throw DomainException.required("Tipo do benefício");
+        if (valorMensal == null) throw DomainException.required("Valor mensal do benefício");
+        if (dataInicio == null) throw DomainException.required("Data de início do benefício");
 
         if (dataInicio.isAfter(LocalDate.now())) {
-            throw new InvalidBeneficioException("Data de início não pode ser futura");
+            throw DomainException.invalidField("dataInicio", "Data de início não pode ser futura");
         }
 
         this.id = UUID.randomUUID();

@@ -1,23 +1,23 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidCPFException;
+import com.consignadohub.customer.domain.exception.DomainException;
 
 public record CPF(String valor) {
 
     public CPF {
         if (valor == null || valor.isBlank()) {
-            throw new InvalidCPFException("CPF não pode ser nulo ou vazio");
+            throw DomainException.required("cpf");
         }
         valor = valor.replaceAll("[^0-9]", "");
 
         if (valor.length() != 11) {
-            throw new InvalidCPFException("CPF deve conter 11 dígitos");
+            throw DomainException.invalidField("cpf", "deve ter 11 dígitos");
         }
         if (todosDigitosIguais(valor)) {
-            throw new InvalidCPFException("CPF com dígitos repetidos é inválido");
+            throw DomainException.invalidField("cpf", "não pode conter todos os dígitos iguais");
         }
         if (!digitosVerificadoresValidos(valor)) {
-            throw new InvalidCPFException("CPF inválido");
+            throw DomainException.invalidField("cpf", "digitos verificadores inválidos");
         }
     }
 

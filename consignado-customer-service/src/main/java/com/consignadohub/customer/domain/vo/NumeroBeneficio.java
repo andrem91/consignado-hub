@@ -1,18 +1,18 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidNumeroBeneficioException;
+import com.consignadohub.customer.domain.exception.DomainException;
 
 public record NumeroBeneficio(String valor) {
 
     public NumeroBeneficio {
         if (valor == null || valor.isBlank()) {
-            throw new InvalidNumeroBeneficioException("Número de benefício não pode ser nulo ou vazio");
+            throw DomainException.required("NumeroBeneficio");
         }
 
         valor = valor.replaceAll("[^0-9]", "");
 
         if (valor.length() != 10) {
-            throw new InvalidNumeroBeneficioException("Número de benefício deve conter 10 dígitos");
+            throw DomainException.invalidField("NumeroBeneficio", "deve ter 10 dígitos");
         }
 
     }

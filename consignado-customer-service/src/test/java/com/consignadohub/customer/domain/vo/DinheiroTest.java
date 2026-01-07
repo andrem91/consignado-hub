@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidDinheiroException;
+import com.consignadohub.customer.domain.exception.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +31,7 @@ public class DinheiroTest {
     @DisplayName("Não deve permitir valor negativo")
     void naoDevePermitirValorNegativo() {
         assertThatThrownBy(() -> Dinheiro.of(new BigDecimal("-100")))
-                .isInstanceOf(InvalidDinheiroException.class);
+                .isInstanceOf(DomainException.class);
     }
 
     @Test

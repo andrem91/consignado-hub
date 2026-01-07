@@ -1,6 +1,6 @@
 package com.consignadohub.customer.application.service;
 
-import com.consignadohub.customer.application.exception.ClienteJaExisteException;
+import com.consignadohub.customer.application.exception.BusinessException;
 import com.consignadohub.customer.application.port.in.command.CadastrarClienteCommand;
 import com.consignadohub.customer.application.port.out.ClienteRepository;
 import com.consignadohub.customer.domain.model.Cliente;
@@ -59,7 +59,7 @@ public class ClienteServiceTest {
                 );
 
         assertThatThrownBy(() -> service.executar(command))
-                .isInstanceOf(ClienteJaExisteException.class);
+                .isInstanceOf(BusinessException.class);
     }
 
 }

@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidPercentualMargemException;
+import com.consignadohub.customer.domain.exception.DomainException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -12,13 +12,13 @@ public record PercentualMargem(BigDecimal valor) {
 
     public PercentualMargem {
         if (valor == null) {
-            throw new InvalidPercentualMargemException("Valor não pode ser nulo");
+            throw DomainException.required("PercentualMargem");
         }
         if (valor.compareTo(BigDecimal.ZERO) < 0) {
-            throw new InvalidPercentualMargemException("Valor não pode ser negativo");
+            throw DomainException.invalidField("PercentualMargem", "não pode ser negativo");
         }
         if (valor.compareTo(new BigDecimal("100")) > 0) {
-            throw new InvalidPercentualMargemException("Valor não pode ser maior que 100");
+            throw DomainException.invalidField("PercentualMargem", "não pode ser maior que 100");
         }
     }
 

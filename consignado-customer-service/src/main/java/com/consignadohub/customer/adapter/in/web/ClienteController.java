@@ -2,7 +2,7 @@ package com.consignadohub.customer.adapter.in.web;
 
 import com.consignadohub.customer.adapter.in.web.dto.CadastrarClienteRequest;
 import com.consignadohub.customer.adapter.in.web.dto.ClienteResponse;
-import com.consignadohub.customer.application.exception.ClienteNaoEncontradoException;
+import com.consignadohub.customer.application.exception.NotFoundException;
 import com.consignadohub.customer.application.port.in.command.CadastrarClienteCommand;
 import com.consignadohub.customer.application.port.in.command.CadastrarClienteUseCase;
 import com.consignadohub.customer.application.port.in.query.BuscarClienteQuery;
@@ -36,7 +36,7 @@ public class ClienteController {
         ClienteId id = cadastrarCliente.executar(command);
 
         Cliente cliente = buscarCliente.buscarPorId(id)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+                .orElseThrow(() -> NotFoundException.cliente("Cliente não encontrado"));
 
         return toResponse(cliente);
     }
@@ -45,7 +45,7 @@ public class ClienteController {
     public ClienteResponse buscarPorCpf(@PathVariable String cpf) {
         return buscarCliente.buscarPorCpf(new CPF(cpf))
                 .map(this::toResponse)
-                .orElseThrow(() -> new ClienteNaoEncontradoException(cpf));
+                .orElseThrow(() -> NotFoundException.cliente(cpf));
     }
 
     private ClienteResponse toResponse(Cliente cliente) {

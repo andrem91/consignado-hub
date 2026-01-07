@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidCETException;
+import com.consignadohub.customer.domain.exception.DomainException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,11 +10,11 @@ public record CET(BigDecimal valorAnual) {
     public CET {
 
         if (valorAnual == null) {
-            throw new InvalidCETException("CET não pode ser nulo");
+            throw DomainException.required("CET");
         }
 
         if(valorAnual.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidCETException("CET deve ser maior que zero");
+            throw DomainException.required("CET");
         }
 
         valorAnual = valorAnual.setScale(2, RoundingMode.HALF_UP);

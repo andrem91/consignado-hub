@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidDinheiroException;
+import com.consignadohub.customer.domain.exception.DomainException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -14,11 +14,11 @@ public record Dinheiro(BigDecimal valor) implements Comparable<Dinheiro> {
 
     public Dinheiro {
         if (valor == null) {
-            throw new InvalidDinheiroException("Valor não pode ser nulo ou vazio");
+            throw DomainException.required("Dinheiro");
         }
 
         if (valor.compareTo(BigDecimal.ZERO) < 0) {
-            throw new InvalidDinheiroException("Valor não pode ser negativo");
+            throw DomainException.invalidField("Dinheiro", "não pode ser negativo");
         }
 
         valor = valor.setScale(2, RoundingMode.HALF_UP);
@@ -66,7 +66,7 @@ public record Dinheiro(BigDecimal valor) implements Comparable<Dinheiro> {
 
     private void validarOperando(Dinheiro outro) {
         if (outro == null) {
-            throw new InvalidDinheiroException("Não é possível operar com valor nulo");
+            throw DomainException.required("Dinheiro");
         }
 
     }

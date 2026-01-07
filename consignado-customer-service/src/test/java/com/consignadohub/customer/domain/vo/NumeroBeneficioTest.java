@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidNumeroBeneficioException;
+import com.consignadohub.customer.domain.exception.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -21,9 +21,9 @@ public class NumeroBeneficioTest {
     @DisplayName("Deve rejeitar número de benefício nulo ou vazio")
     void deveRejeitarNuloOuVazio() {
         assertThatThrownBy(() -> new NumeroBeneficio(null))
-                .isInstanceOf(InvalidNumeroBeneficioException.class);
+                .isInstanceOf(DomainException.class);
         assertThatThrownBy(() -> new NumeroBeneficio(""))
-                .isInstanceOf(InvalidNumeroBeneficioException.class);
+                .isInstanceOf(DomainException.class);
     }
 
     @Test
@@ -37,7 +37,7 @@ public class NumeroBeneficioTest {
     @DisplayName("Deve rejeitar número com tamanho inválido")
     void deveRejeitarTamanhoInvalido() {
         assertThatThrownBy(() -> new NumeroBeneficio("123456789"))
-                .isInstanceOf(InvalidNumeroBeneficioException.class);
+                .isInstanceOf(DomainException.class);
     }
 
     @Test

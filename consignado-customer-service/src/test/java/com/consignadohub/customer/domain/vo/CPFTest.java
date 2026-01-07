@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidCPFException;
+import com.consignadohub.customer.domain.exception.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,9 +28,9 @@ public class CPFTest {
     @DisplayName("Deve rejeitar CPF nulo ou vazio")
     void deveRejeitarCPFNuloOuVazio() {
     assertThatThrownBy(() -> new CPF(null))
-            .isInstanceOf(InvalidCPFException.class);
+            .isInstanceOf(DomainException.class);
     assertThatThrownBy(() -> new CPF(""))
-            .isInstanceOf(InvalidCPFException.class);
+            .isInstanceOf(DomainException.class);
     }
 
     @Test
@@ -49,13 +49,13 @@ public class CPFTest {
     @DisplayName("Deve rejeitar CPF com dígitos repetidos")
     void deveRejeitarDigitosRepetidos() {
         assertThatThrownBy(() -> new CPF("11111111111"))
-                .isInstanceOf(InvalidCPFException.class);
+                .isInstanceOf(DomainException.class);
     }
     @Test
     @DisplayName("Deve rejeitar CPF com dígito verificador inválido")
     void deveRejeitarDigitoInvalido() {
         assertThatThrownBy(() -> new CPF("12345678901"))
-                .isInstanceOf(InvalidCPFException.class);
+                .isInstanceOf(DomainException.class);
     }
 
 }

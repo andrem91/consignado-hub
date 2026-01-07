@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidTaxaJurosException;
+import com.consignadohub.customer.domain.exception.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,13 +30,13 @@ public class TaxaJurosTest {
     @DisplayName("Não deve permitir taxa negativa")
     void naoDevePermitirTaxaNegativa() {
         assertThatThrownBy(() -> TaxaJuros.of(new BigDecimal("-1.00")))
-                .isInstanceOf(InvalidTaxaJurosException.class);
+                .isInstanceOf(DomainException.class);
     }
 
     @Test
     @DisplayName("Não deve permitir taxa acima do limite legal")
     void naoDevePermitirTaxaAcimaDoLimite() {
         assertThatThrownBy(() -> TaxaJuros.of(new BigDecimal("5.00")))
-                .isInstanceOf(InvalidTaxaJurosException.class);
+                .isInstanceOf(DomainException.class);
     }
 }

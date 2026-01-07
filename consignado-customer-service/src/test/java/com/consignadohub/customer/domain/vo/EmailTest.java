@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidEmailException;
+import com.consignadohub.customer.domain.exception.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,15 +31,15 @@ class EmailTest {
     @DisplayName("Não deve criar email com formato inválido")
     void naoDeveCriarInvalido(String valorInvalido) {
         assertThatThrownBy(() -> new Email(valorInvalido))
-                .isInstanceOf(InvalidEmailException.class);
+                .isInstanceOf(DomainException.class);
     }
 
     @Test
     @DisplayName("Deve rejeitar email nulo ou vazio")
     void deveRejeitarNuloOuVazio() {
         assertThatThrownBy(() -> new Email(null))
-                .isInstanceOf(InvalidEmailException.class);
+                .isInstanceOf(DomainException.class);
         assertThatThrownBy(() -> new Email(""))
-                .isInstanceOf(InvalidEmailException.class);
+                .isInstanceOf(DomainException.class);
     }
 }

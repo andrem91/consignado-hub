@@ -1357,9 +1357,62 @@ Após deploy, monitore:
 
 ---
 
+## 🎯 Sprint 1.5: Polimento + Dados Bancários
+
+> **Objetivo:** Preparar Customer para desembolso + tratamento de erros
+
+### 📋 Implementação
+
+#### Parte 1: DadosBancarios VO (TDD)
+
+```java
+public enum TipoConta { CORRENTE, POUPANCA }
+
+public record DadosBancarios(
+    String banco,    // COMPE (341=Itaú, 001=BB)
+    String agencia, String conta, String digito, TipoConta tipo
+) {
+    public DadosBancarios {
+        if (banco == null || !banco.matches("\\d{3}"))
+            throw new InvalidDadosBancariosException("Banco inválido");
+    }
+}
+```
+
+#### Parte 2: GlobalExceptionHandler
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ErrorResponse> handle(DomainException ex) {
+        return ResponseEntity.status(422)
+            .body(new ErrorResponse(ex.getCode(), ex.getMessage()));
+    }
+}
+```
+
+#### Parte 3: Logs no Service
+
+```java
+@Slf4j
+public class ClienteService {
+    log.info("Cadastrando cliente. CPF mascarado");
+}
+```
+
+### ✅ Definition of Done
+
+- [ ] DadosBancarios + ChavePix VOs
+- [ ] GlobalExceptionHandler
+- [ ] Logs no ClienteService
+
+---
+
 ## 🎯 Sprint 2: MVP Simulation Service
 
 > **Objetivo:** Calcular parcela de empréstimo com taxa fixa
+
 
 ### 📋 User Stories
 

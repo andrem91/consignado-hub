@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidTaxaJurosException;
+import com.consignadohub.customer.domain.exception.DomainException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -11,15 +11,15 @@ public record TaxaJuros(BigDecimal valorMensal) {
 
     public TaxaJuros {
         if (valorMensal == null) {
-            throw new InvalidTaxaJurosException("Valor mensal não pode ser nulo");
+            throw DomainException.invalidField("ValorMensal", "deve ter valor mensal");
         }
 
         if (valorMensal.compareTo(BigDecimal.ZERO) < 0) {
-            throw new InvalidTaxaJurosException("Valor mensal não pode ser negativo");
+            throw DomainException.invalidField("ValorMensal", "deve ser maior que zero");
         }
 
         if (valorMensal.compareTo(LIMITE_MAXIMO) > 0) {
-            throw new InvalidTaxaJurosException("Valor mensal não pode ser maior que " + LIMITE_MAXIMO);
+            throw DomainException.invalidField("ValorMensal", "deve ser menor que " + LIMITE_MAXIMO);
         }
     }
 

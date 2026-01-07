@@ -1,16 +1,16 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidTelefoneException;
+import com.consignadohub.customer.domain.exception.DomainException;
 
 public record Telefone(String valor) {
     public Telefone {
         if (valor == null || valor.isBlank()) {
-            throw new InvalidTelefoneException("Telefone não pode ser nulo");
+            throw DomainException.required("Telefone");
         }
         valor = valor.replaceAll("\\D", "");
 
         if (valor.length() < 10 || valor.length() > 11) {
-            throw new InvalidTelefoneException("Telefone deve ter 10 ou 11 dígitos");
+            throw DomainException.invalidField("Telefone", "deve ter entre 10 e 11 dígitos");
         }
     }
 

@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidCETException;
+import com.consignadohub.customer.domain.exception.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,14 +23,14 @@ class CETTest {
     @DisplayName("Não deve permitir CET negativo")
     void naoDevePermitirCETNegativo() {
         assertThatThrownBy(() -> CET.of(new BigDecimal("-5")))
-                .isInstanceOf(InvalidCETException.class);
+                .isInstanceOf(DomainException.class);
     }
 
     @Test
     @DisplayName("Não deve permitir CET zero")
     void naoDevePermitirCETZero() {
         assertThatThrownBy(() -> CET.of(BigDecimal.ZERO))
-                .isInstanceOf(InvalidCETException.class);
+                .isInstanceOf(DomainException.class);
     }
 
     @Test

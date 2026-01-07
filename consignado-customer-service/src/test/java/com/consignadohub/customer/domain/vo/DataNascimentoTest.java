@@ -1,6 +1,6 @@
 package com.consignadohub.customer.domain.vo;
 
-import com.consignadohub.customer.domain.exception.InvalidDataNascimentoException;
+import com.consignadohub.customer.domain.exception.DomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,20 +31,20 @@ class DataNascimentoTest {
     @DisplayName("Deve rejeitar data nula")
     void deveRejeitarDataNula() {
         assertThatThrownBy(() -> new DataNascimento(null))
-                .isInstanceOf(InvalidDataNascimentoException.class);
+                .isInstanceOf(DomainException.class);
     }
 
     @Test
     @DisplayName("Deve rejeitar data futura")
     void deveRejeitarDataFutura() {
         assertThatThrownBy(() -> new DataNascimento(LocalDate.now().plusDays(1)))
-                .isInstanceOf(InvalidDataNascimentoException.class);
+                .isInstanceOf(DomainException.class);
     }
 
     @Test
     @DisplayName("Deve rejeitar idade menor que 18 anos")
     void deveRejeitarIdadeMenorQue18() {
         assertThatThrownBy(() -> new DataNascimento(LocalDate.now().minusYears(17)))
-                .isInstanceOf(InvalidDataNascimentoException.class);
+                .isInstanceOf(DomainException.class);
     }
 }
