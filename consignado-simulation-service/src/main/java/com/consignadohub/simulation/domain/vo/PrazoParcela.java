@@ -1,17 +1,18 @@
-package com.consignadohub.customer.domain.vo;
+package com.consignadohub.simulation.domain.vo;
 
-import com.consignadohub.customer.domain.exception.DomainException;
+import com.consignadohub.simulation.domain.exception.DomainException;
 
 public record PrazoParcela(int meses) {
+
     public static final int MINIMO = 6;
     public static final int MAXIMO = 84;
 
     public PrazoParcela {
-        if(meses < MINIMO) {
+        if (meses < MINIMO) {
             throw DomainException.invalidField("PrazoParcela", "Mínimo é " + MINIMO + " meses");
         }
 
-        if(meses > MAXIMO) {
+        if (meses > MAXIMO) {
             throw DomainException.invalidField("PrazoParcela", "Máximo é " + MAXIMO + " meses");
         }
     }
