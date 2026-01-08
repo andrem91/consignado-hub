@@ -1,0 +1,35 @@
+.table-wrapper {
+    overflow-x: auto;
+    margin: 15px 0;
+}
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.styled-table th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--accent-primary);
+    white-space: nowrap;
+}
+
+.styled-table tr:hover {
+    background: rgba(79, 70, 229, 0.1);
+}
+
+.styled-table td code {
+    background: rgba(79, 70, 229, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}

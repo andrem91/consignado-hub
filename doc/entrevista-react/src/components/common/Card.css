@@ -1,0 +1,125 @@
+.card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    border-color: rgba(79, 70, 229, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card--open {
+    border-color: rgba(79, 70, 229, 0.5);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    cursor: pointer;
+    background: var(--bg-card-hover);
+    transition: background 0.2s ease;
+}
+
+.card-header:hover {
+    background: var(--bg-secondary);
+}
+
+.card-header-content {
+    flex: 1;
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 6px 0;
+    color: var(--text-primary);
+}
+
+.card-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+.tag--básico {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.tag--intermediário {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.tag--avançado {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.tag--importante {
+    background: rgba(79, 70, 229, 0.2);
+    color: #818cf8;
+}
+
+.tag--fundamentos {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+.toggle-icon {
+    font-size: 1.5rem;
+    color: var(--accent-primary);
+    width: 30px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.card-content {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.interview-answer {
+    margin-top: 20px;
+    padding: 15px 20px;
+    background: rgba(16, 185, 129, 0.1);
+    border-left: 4px solid #10b981;
+    border-radius: 0 8px 8px 0;
+}
+
+.interview-answer strong {
+    color: #10b981;
+}
+
+.interview-answer p {
+    margin: 8px 0 0 0;
+    font-style: italic;
+    color: var(--text-secondary);
+}

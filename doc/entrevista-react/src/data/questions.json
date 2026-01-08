@@ -1,0 +1,1389 @@
+[
+  {
+    "id": "section-1",
+    "title": "📚 1. PROGRAMAÇÃO ORIENTADA A OBJETOS (POO)",
+    "questions": [
+      {
+        "id": "q-1-0",
+        "title": "O que é POO?",
+        "tags": [
+          "básico"
+        ],
+        "content": "POO é um paradigma de programação que organiza o código em torno de objetos, que são instâncias de classes. Esses objetos combinam dados (atributos) e comportamentos (métodos), permitindo modelar problemas do mundo real de forma mais intuitiva. \nNo meu dia a dia com Java, isso facilita muito a manutenção e reutilização de código. Por exemplo, ao modelar um sistema bancário, posso criar uma classe `Cliente` que encapsula CPF, nome e comportamentos como `validarIdade()`, refletindo exatamente como pensamos sobre clientes no mundo real.\nA POO contrasta com a programação procedural, onde o código é organizado em funções que manipulam dados. Com POO, os dados e as operações sobre eles ficam juntos, aumentando a coesão e reduzindo o acoplamento."
+      },
+      {
+        "id": "q-1-1",
+        "title": "Quais são os pilares da orientação a objetos? Descreva sucintamente cada um deles.",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "Os quatro pilares são:\n**Encapsulamento:**\nProteger os dados internos de uma classe, expondo apenas o necessário através de métodos públicos. Uso bastante modificadores de acesso e getters/setters quando apropriado. Por exemplo, no meu projeto de crédito consignado, o CPF é armazenado internamente como String limpa, mas exponho apenas métodos como `formatar()` e `mascarar()`. O estado interno fica protegido.\n**Herança:**\nPermite que uma classe herde características de outra, promovendo reuso de código. Sempre tento usar com cuidado para não criar hierarquias muito complexas - prefiro composição sobre herança na maioria dos casos. Um bom uso é quando realmente existe uma relação \"é um\", como `ContaCorrente extends Conta`.\n**Polimorfismo:**\nCapacidade de objetos de classes diferentes responderem à mesma mensagem de formas distintas. Utilizo muito com interfaces e sobrescrita de métodos. Por exemplo, tenho uma interface `ClienteRepository` que pode ter implementações diferentes (`ClienteJpaRepository`, `ClienteInMemoryRepository`) - o código cliente não precisa saber qual está sendo usada.\n**Abstração:**\nFocar no essencial, ocultando detalhes complexos. Classes abstratas e interfaces são ferramentas que uso frequentemente para isso. No meu projeto, `CadastrarClienteUseCase` é uma interface que abstrai completamente como o cadastro é feito - o Controller só sabe que pode chamar `executar()`.",
+        "code": "public record CPF(String valor) {\n    // valor é privado implicitamente\n    public String formatar() { return \"XXX.XXX.XXX-XX\"; }\n    public String mascarar() { return \"***.***.***-XX\"; }\n}",
+        "tip": "Focar no essencial, ocultando detalhes complexos. Classes abstratas e interfaces são ferramentas que uso frequentemente para isso. No meu projeto, `CadastrarClienteUseCase` é uma interface que abstrai completamente como o cadastro é feito - o Controller só sabe que pode chamar `executar()`."
+      },
+      {
+        "id": "q-1-2",
+        "title": "Qual a diferença entre classe abstrata e interface?",
+        "tags": [
+          "básico"
+        ],
+        "content": "Essa é uma pergunta clássica que mostra entendimento profundo de OOP:\n**Classe Abstrata:**\n- Pode ter implementação de métodos (concretos e abstratos)\n- Pode ter estado (atributos de instância)\n- Pode ter construtores\n- Herança única: uma classe só pode estender uma classe abstrata\n- Uso quando tenho código comum que quero compartilhar entre subclasses\n**Interface:**\n- Antes do Java 8: apenas métodos abstratos\n- Java 8+: pode ter métodos default e static\n- Apenas constantes (public static final)\n- Não tem construtores\n- Múltipla implementação: uma classe pode implementar várias interfaces\n- Uso para definir contratos\n**Quando usar cada:**\n- **Interface:** Quando quero definir um contrato que múltiplas classes não relacionadas podem implementar (ex: `Serializable`, `Comparable`)\n- **Classe Abstrata:** Quando tenho código comum que quero compartilhar E as classes têm uma relação hierárquica clara (ex: `Conta -> ContaCorrente, ContaPoupanca`)\n**Regra prática:** Prefira interfaces. Use classe abstrata apenas quando realmente precisa compartilhar código.",
+        "code": "public interface Pagavel {\n    void pagar(BigDecimal valor);\n    \n    default boolean podePagar(BigDecimal valor) {\n        return true; // Implementação default\n    }\n}"
+      }
+    ]
+  },
+  {
+    "id": "section-2",
+    "title": "🏗️ 2. PRINCÍPIOS E PADRÕES DE DESIGN",
+    "questions": [
+      {
+        "id": "q-2-0",
+        "title": "Fale sobre os princípios SOLID.",
+        "tags": [
+          "importante"
+        ],
+        "content": "SOLID é um conjunto de princípios que me guiam para escrever código mais limpo e manutenível. Aprendi que aplicar SOLID não é sobre seguir regras cegamente, mas entender o \"porquê\" de cada princípio:\n**S - Single Responsibility Principle (Responsabilidade Única):**\nCada classe deve ter apenas uma responsabilidade, apenas um motivo para mudar. Evito criar \"classes Deus\" que fazem tudo. \nNo meu projeto, separei `ClienteService` (orquestração) de `ClienteRepository` (persistência) de `ClienteController` (HTTP). Cada um muda por motivos diferentes: regras de negócio, banco de dados, ou API.\n**O - Open/Closed Principle (Aberto/Fechado):**\nClasses devem estar abertas para extensão, mas fechadas para modificação. Uso muito interfaces e herança para isso. \nExemplo: Se amanhã precisar de um novo tipo de cálculo de IOF, não modifico a classe existente - crio uma nova implementação da interface `CalculadoraIOF`.\n**L - Liskov Substitution Principle (Substituição de Liskov):**\nSubclasses devem poder substituir suas superclasses sem quebrar o sistema. \nTeste mental: se tenho um método que recebe `Conta`, posso passar `ContaCorrente` ou `ContaPoupanca` e tudo continua funcionando? Se não, violei Liskov.\n**I - Interface Segregation Principle (Segregação de Interfaces):**\nPrefiro interfaces menores e específicas a uma interface grande e genérica. Isso evita que classes implementem métodos que não precisam.\n**D - Dependency Inversion Principle (Inversão de Dependência):**\nDependo de abstrações, não de implementações concretas. Isso casa perfeitamente com injeção de dependências no Spring.",
+        "tip": "No meu projeto, separei `ClienteService` (orquestração) de `ClienteRepository` (persistência) de `ClienteController` (HTTP). Cada um muda por motivos diferentes: regras de negócio, banco de dados, ou API.",
+        "code": "// Ruim: depende de implementação\npublic class ClienteService {\n    private ClienteJpaRepository repository = new ClienteJpaRepository();\n}\n\n// Bom: depende de abstração\npublic class ClienteService {\n    private final ClienteRepository repository; // Interface\n    \n    public ClienteService(ClienteRepository repository) {\n        this.repository = repository;\n    }\n}"
+      },
+      {
+        "id": "q-2-1",
+        "title": "O que é Clean Code? Como você aplica no dia a dia?",
+        "tags": [
+          "básico"
+        ],
+        "content": "Clean Code são práticas para escrever código legível e manutenível, popularizadas pelo livro do Uncle Bob (Robert C. Martin). A ideia central é que código é lido muito mais vezes do que escrito, então devemos otimizar para leitura.\n**Princípios que aplico diariamente:**\n**1. Nomes Significativos:**\n**2. Funções Pequenas:**\nCada função deve fazer uma coisa só, e fazer bem. Se preciso de um comentário explicando o que um bloco faz, deveria ser uma função separada.\n**3. Sem Comentários Desnecessários:**\nCódigo auto-explicativo não precisa de comentários. Comentários mentem quando o código muda e ninguém atualiza o comentário.\n**4. DRY (Don't Repeat Yourself):**\nSe vejo código duplicado, extraio para um método ou classe.\n**5. Tratamento de Erros:**\nPrefiro exceptions a códigos de erro. E trato exceptions no nível apropriado (GlobalExceptionHandler no meu projeto).\n**6. Testes:**\nCódigo limpo tem testes. Se não consigo testar facilmente, provavelmente o código não está limpo.",
+        "code": "// Ruim: comentário óbvio\n// Incrementa contador\ncontador++;\n\n// Bom: código que se explica\nint numeroDeTentativas = 0;\nnumeroDeTentativas++;"
+      },
+      {
+        "id": "q-2-2",
+        "title": "O que é Clean Architecture?",
+        "tags": [
+          "básico"
+        ],
+        "content": "Clean Architecture é uma arquitetura proposta por Uncle Bob que organiza o código em camadas concêntricas, com a regra de que dependências sempre apontam para dentro.\n**Regra da Dependência:**\nO código nas camadas internas não pode saber NADA sobre as camadas externas. Isso significa que:\n- Entities não conhecem Use Cases\n- Use Cases não conhecem Controllers\n- Nada no core conhece Spring ou JPA\n**Benefícios que vejo na prática:**\n1. **Testabilidade:** Posso testar regras de negócio sem banco, sem web server\n2. **Independência de frameworks:** Posso trocar Spring por Quarkus sem tocar no domínio\n3. **Independência de UI:** Web, mobile, CLI - mesmo core\n4. **Independência de banco:** PostgreSQL, MongoDB - mesmo core\n**No meu projeto ConsignadoHub:**\n- **Entities:** `Cliente`, `Beneficio`, VOs como `CPF`, `Dinheiro`\n- **Use Cases:** `CadastrarClienteUseCase`, `BuscarClienteQuery`\n- **Interface Adapters:** `ClienteController`, `ClienteRepositoryAdapter`\n- **Frameworks:** Spring Boot, JPA, PostgreSQL",
+        "code": "┌─────────────────────────────────────────────────────────┐\n│              FRAMEWORKS & DRIVERS (mais externo)         │\n│  Spring, Hibernate, Controllers, Banco de Dados         │\n│   ┌─────────────────────────────────────────────────┐   │\n│   │           INTERFACE ADAPTERS                     │   │\n│   │   Presenters, Gateways, Controllers              │   │\n│   │   ┌─────────────────────────────────────────┐   │   │\n│   │   │        APPLICATION BUSINESS RULES        │   │   │\n│   │   │   Use Cases (orquestração)               │   │   │\n│   │   │   ┌─────────────────────────────────┐   │   │   │\n│   │   │   │   ENTERPRISE BUSINESS RULES     │   │   │   │\n│   │   │   │   Entities (regras de negócio)  │   │   │   │\n│   │   │   └─────────────────────────────────┘   │   │   │\n│   │   └─────────────────────────────────────────┘   │   │\n│   └─────────────────────────────────────────────────┘   │\n└─────────────────────────────────────────────────────────┘",
+        "tip": "No meu projeto ConsignadoHub:"
+      },
+      {
+        "id": "q-2-3",
+        "title": "Quais Design Patterns você mais usa? Dê exemplos práticos.",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "Uso diversos patterns, mas alguns são realmente frequentes no meu dia a dia:\n**Factory Method:**\nPara criação de objetos complexos ou quando quero esconder a lógica de criação.\n**Strategy:**\nPara múltiplos algoritmos intercambiáveis. Muito útil quando tenho if/else ou switch que cresce.\n**Repository:**\nAbstrai a camada de persistência. O domínio não sabe se estou usando JPA, MongoDB ou arquivo.\n**Builder:**\nPara construção de objetos complexos passo a passo. Lombok gera automaticamente.\n**Adapter:**\nConverte uma interface em outra. Uso muito para integrar camadas.\n**Singleton:**\nUma única instância. No Spring, todos os beans são singleton por padrão - não preciso implementar manualmente.",
+        "code": "// Adapter que implementa Port do domínio usando JPA\n@Repository\npublic class ClienteRepositoryAdapter implements ClienteRepository {\n    private final ClienteJpaRepository jpaRepository;\n    private final ClienteMapper mapper;\n    \n    @Override\n    public Cliente salvar(Cliente cliente) {\n        ClienteJpaEntity entity = mapper.toEntity(cliente);\n        jpaRepository.save(entity);\n        return cliente;\n    }\n}"
+      },
+      {
+        "id": "q-2-4",
+        "title": "Como os princípios SOLID se combinam com Clean Architecture?",
+        "tags": [
+          "intermediário",
+          "importante"
+        ],
+        "content": "Clean Architecture e SOLID são complementares. A Clean Architecture organiza o código em camadas concêntricas com a regra de que dependências apontam para dentro. Isso é exatamente o princípio D do SOLID (Inversão de Dependência) aplicado em nível arquitetural.",
+        "table": {
+          "headers": [
+            "Princípio SOLID",
+            "Como Aplica na Clean Architecture"
+          ],
+          "rows": [
+            [
+              "**S - Single Responsibility**",
+              "Cada camada tem uma responsabilidade: Domain (regras), Application (orquestração), Adapters (conversão)"
+            ],
+            [
+              "**O - Open/Closed**",
+              "Adiciono novos Use Cases sem modificar os existentes. Novos Adapters sem tocar no Domain"
+            ],
+            [
+              "**L - Liskov Substitution**",
+              "Posso trocar `ClienteJpaRepository` por `ClienteInMemoryRepository` - ambos implementam `ClienteRepository`"
+            ],
+            [
+              "**I - Interface Segregation**",
+              "Separo `CadastrarClienteUseCase` de `BuscarClienteQuery` - interfaces pequenas e focadas"
+            ],
+            [
+              "**D - Dependency Inversion**",
+              "O Domain define interfaces (Ports), Adapters implementam. Dependência sempre aponta para dentro"
+            ]
+          ]
+        },
+        "answer": "Clean Architecture é a ESTRUTURA, SOLID são as REGRAS de como construir cada parte. O princípio D (Inversão de Dependência) é o coração da Clean Architecture - o Domain define interfaces como `ClienteRepository`, e a camada de Adapters implementa com `ClienteJpaRepository`. O Domain não conhece JPA, depende de abstrações. Resumindo: SOLID são os princípios para escrever classes boas, Clean Architecture é como organizar essas classes respeitando esses princípios."
+      },
+      {
+        "id": "q-2-5",
+        "title": "O que são Use Cases?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "Use Cases são as AÇÕES que o sistema sabe fazer. Cada Use Case representa uma operação de negócio que um usuário pode executar.\n**Estrutura de um Use Case:**\n**Use Case vs Service Tradicional:**",
+        "code": "// Interface (Port de entrada)\npublic interface CadastrarClienteUseCase {\n    ClienteId executar(CadastrarClienteCommand command);\n}\n\n// Implementação (Service)\n@Service\npublic class CadastrarClienteService implements CadastrarClienteUseCase {\n    \n    private final ClienteRepository repository;  // Port de saída\n    \n    @Override\n    public ClienteId executar(CadastrarClienteCommand command) {\n        // 1. Criar entidade de domínio\n        Cliente cliente = Cliente.criar(new CPF(command.cpf()), command.nome());\n        \n        // 2. Aplicar regras de negócio\n        if (repository.existePorCpf(cliente.getCpf())) {\n            throw BusinessException.cpfJaCadastrado(cliente.getCpf());\n        }\n        \n        // 3. Persistir\n        return repository.salvar(cliente);\n    }\n}",
+        "table": {
+          "headers": [
+            "Service Tradicional",
+            "Use Case (Clean Architecture)"
+          ],
+          "rows": [
+            [
+              "Classe com vários métodos",
+              "Uma interface = Uma ação"
+            ],
+            [
+              "`ClienteService.cadastrar()`, `.buscar()`",
+              "`CadastrarClienteUseCase`, `BuscarClienteQuery`"
+            ],
+            [
+              "Tende a virar \"God Class\"",
+              "Cada use case é pequeno e focado"
+            ],
+            [
+              "Difícil de testar isoladamente",
+              "Fácil de mockar dependências"
+            ]
+          ]
+        },
+        "answer": "Use Cases representam as ações de negócio que o sistema oferece. Cada Use Case é uma interface com um único método - geralmente `executar()`. Isso segue o Single Responsibility: uma classe, uma razão para mudar. A vantagem é que o Controller só conhece a interface `CadastrarClienteUseCase`, não a implementação. Posso trocar a implementação sem tocar no Controller."
+      }
+    ]
+  },
+  {
+    "id": "section-3",
+    "title": "🏛️ 3. ARQUITETURA E METODOLOGIAS",
+    "questions": [
+      {
+        "id": "q-3-0",
+        "title": "Explique a metodologia DDD de acordo com o seu entendimento.",
+        "tags": [
+          "básico"
+        ],
+        "content": "DDD (Domain-Driven Design) é uma abordagem que coloca o domínio do negócio no centro do desenvolvimento. Foi proposta por Eric Evans e mudou como penso sobre arquitetura de software.\n**Conceitos Estratégicos:**\n**Linguagem Ubíqua:**\nDesenvolvedores e especialistas de negócio usam os mesmos termos. Se o negócio fala \"margem consignável\", meu código tem `margemConsignavel`, não `availableMargin` ou `margem_disponivel`.\n**Bounded Contexts:**\nDivisão do sistema em contextos com fronteiras claras. Cada contexto tem seu próprio modelo. \"Cliente\" no contexto de Cadastro é diferente de \"Cliente\" no contexto de Cobrança.\n**Conceitos Táticos:**\n**Entities:**\nObjetos com identidade única. Dois clientes com mesmo nome são diferentes se têm IDs diferentes.\n**Value Objects:**\nImutáveis, sem identidade. Dois CPFs com mesmo valor são iguais.\n**Aggregates:**\nCluster de entidades tratadas como unidade. Aggregate Root é o único ponto de entrada.\n**Repositories:**\nInterface para persistência, definida no domínio, implementada na infraestrutura.\n**Domain Services:**\nQuando uma operação não pertence naturalmente a nenhuma entidade.\n**No meu projeto ConsignadoHub:**\nAplico DDD dividindo claramente: VOs (CPF, Dinheiro), Entities (Cliente, Beneficio), Aggregates (Cliente como root), e Repositories (ClienteRepository).",
+        "code": "public class Cliente { // Aggregate Root\n    private List<Beneficio> beneficios; // Parte do agregado\n    \n    public void adicionarBeneficio(Beneficio beneficio) {\n        // Regras de negócio aqui\n        this.beneficios.add(beneficio);\n    }\n}\n// Nunca acesso Beneficio diretamente, sempre via Cliente",
+        "tip": "No meu projeto ConsignadoHub:"
+      },
+      {
+        "id": "q-3-1",
+        "title": "Como funciona a arquitetura de microserviços?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "É uma abordagem onde dividimos a aplicação em serviços menores, independentes e especializados. Cada microserviço:\n**Características:**\n- **Tem seu próprio banco de dados:** Não compartilha dados diretamente com outros serviços\n- **Deploy independente:** Posso atualizar um sem afetar outros\n- **Tecnologia independente:** Cada um pode usar linguagem/framework diferentes\n- **Time autônomo:** Um time cuida do serviço end-to-end\n**Comunicação:**\n- **Síncrona:** REST, gRPC (quando precisa de resposta imediata)\n- **Assíncrona:** Mensageria como Kafka, RabbitMQ (para desacoplamento)\n**Padrões importantes:**\n- **API Gateway:** Ponto de entrada único\n- **Service Discovery:** Serviços se encontram dinamicamente\n- **Circuit Breaker:** Evita cascata de falhas\n- **Saga:** Transações distribuídas\n**Trade-offs que considero:**\n**Quando usar:**\n- Times grandes que precisam de autonomia\n- Partes do sistema com escalas diferentes\n- Quando já entende bem o domínio (não para MVP)\n**Quando NÃO usar:**\n- MVP, prova de conceito\n- Times pequenos (<10 pessoas)\n- Quando não tem observabilidade madura",
+        "table": {
+          "headers": [
+            "Benefícios",
+            "Desafios"
+          ],
+          "rows": [
+            [
+              "Escala independente",
+              "Complexidade operacional"
+            ],
+            [
+              "Times autônomos",
+              "Transações distribuídas"
+            ],
+            [
+              "Deploy independente",
+              "Latência de rede"
+            ],
+            [
+              "Falha isolada",
+              "Consistência eventual"
+            ],
+            [
+              "Tecnologia heterogênea",
+              "Monitoramento distribuído"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "q-3-2",
+        "title": "O que é arquitetura Hexagonal?",
+        "tags": [
+          "básico"
+        ],
+        "content": "Também conhecida como Ports and Adapters, é um padrão arquitetural criado por Alistair Cockburn que isola a lógica de negócio das dependências externas.\n**Estrutura:**\n**Conceitos chave:**\n**Ports (Portas):**\nInterfaces que definem como o mundo externo interage com a aplicação.\n- **Ports de Entrada (Driving):** Use Cases, como `CadastrarClienteUseCase`\n- **Ports de Saída (Driven):** Repositórios, como `ClienteRepository`\n**Adapters (Adaptadores):**\nImplementações concretas das ports.\n- **Adapters de Entrada:** `ClienteController` (HTTP → Use Case)\n- **Adapters de Saída:** `ClienteRepositoryAdapter` (Use Case → JPA)\n**Benefícios que experimento:**\n1. **Testabilidade:** Testo domínio sem banco, sem web\n2. **Independência de frameworks:** Domínio não conhece Spring\n3. **Troca fácil de tecnologias:** Posso trocar PostgreSQL por MongoDB trocando só o adapter\n4. **Código organizado:** Cada coisa no seu lugar\n**No meu ConsignadoHub:**",
+        "code": "adapter/in/web/          → Controllers (HTTP)\nadapter/out/persistence/ → JPA (Banco)\napplication/port/in/     → Use Cases (interfaces)\napplication/port/out/    → Repositories (interfaces)\napplication/service/     → Implementações dos Use Cases\ndomain/model/            → Entidades\ndomain/vo/               → Value Objects\ndomain/exception/        → Exceções de domínio"
+      },
+      {
+        "id": "q-3-3",
+        "title": "E outras arquiteturas? Pode citar algumas?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "Além de Hexagonal, existem várias arquiteturas que uso ou conheço:\n**Monolítica:**\nTudo em uma aplicação. Simples para começar, difícil de escalar partes independentemente.\n- **Quando usar:** MVP, times pequenos, prova de conceito\n- **Quando evitar:** Quando partes diferentes têm escalas muito diferentes\n**Microserviços:**\nServiços pequenos, independentes, com seu próprio banco.\n- **Quando usar:** Times grandes, escala independente necessária\n- **Quando evitar:** MVP, times pequenos, sem observabilidade madura\n**Event-Driven:**\nComunicação baseada em eventos. Serviços publicam/consomem eventos.\n- **Quando usar:** Desacoplamento forte, eventual consistency OK\n- **Quando evitar:** Quando precisa de consistência imediata\n**Serverless:**\nFunções executadas sob demanda (AWS Lambda, Azure Functions).\n- **Quando usar:** Workloads variáveis, eventos esporádicos\n- **Quando evitar:** Processamento contínuo, cold start é problema\n**CQRS (Command Query Responsibility Segregation):**\nModelos separados para leitura e escrita, potencialmente bancos diferentes.\n- **Quando usar:** Alto volume de leitura, Event Sourcing\n- **Quando evitar:** CRUD simples, complexidade desnecessária\n**Layered (Camadas):**\nTradicional: Presentation → Business → Data Access.\n- **Quando usar:** Aplicações simples, equipe acostumada\n- **Quando evitar:** Quando quer isolar domínio de frameworks"
+      },
+      {
+        "id": "q-3-4",
+        "title": "O que é Saga Pattern?",
+        "tags": [
+          "básico"
+        ],
+        "content": "Saga é um padrão para gerenciar transações distribuídas em arquiteturas de microserviços, onde não podemos usar transações ACID tradicionais.\n**O problema:**\nEm um monolito, posso fazer:\nEm microserviços, cada operação está em um serviço diferente com seu banco. Preciso de Saga.\n**Como funciona:**\nUma Saga é uma sequência de transações locais. Cada serviço:\n1. Executa sua transação local\n2. Publica um evento\n3. Próximo serviço reage ao evento\nSe alguma etapa falhar, executa **compensações** (rollback semântico):\n**Tipos de Saga:**\n**Choreography (Coreografado):**\nCada serviço sabe o que fazer quando recebe um evento. Descentralizado.\n- **Vantagem:** Simples, desacoplado\n- **Desvantagem:** Fluxo difícil de visualizar\n**Orchestration (Orquestrado):**\nUm orquestrador central controla o fluxo.\n- **Vantagem:** Fluxo claro, centralizado\n- **Desvantagem:** Orquestrador é ponto único de falha\n**No contexto de crédito consignado:**\n1. **ContratoService:** Cria contrato (compensação: marcar como cancelado)\n2. **INSSService:** Averba no INSS (compensação: desaverbar)\n3. **PagamentoService:** Libera dinheiro (compensação: solicitar estorno)",
+        "code": "Orquestrador --> ContratoService\n            --> AverbacaoService  \n            --> LiberacaoService"
+      },
+      {
+        "id": "q-3-5",
+        "title": "Qual a diferença entre CQS e CQRS?",
+        "tags": [
+          "básico"
+        ],
+        "content": "Essa distinção é importante e muita gente confunde:\n**CQS (Command Query Separation):**\nPrincípio de design onde métodos são ou Commands (alteram estado) ou Queries (leem estado), nunca ambos.\nNo meu projeto, aplico separando interfaces:\n**Mesmo banco, interfaces separadas.** Complexidade baixa.\n**CQRS (Command Query Responsibility Segregation):**\nArquitetura onde temos modelos diferentes para leitura e escrita, potencialmente bancos diferentes.\n**Bancos diferentes, modelos diferentes.** Complexidade alta.\n**Quando usar cada:**",
+        "code": "┌──────────────┐         ┌──────────────┐\n│   Commands   │         │   Queries    │\n└──────┬───────┘         └──────┬───────┘\n       │                        │\n       ▼                        ▼\n┌──────────────┐         ┌──────────────┐\n│ Write Model  │  ─────► │ Read Model   │\n│  (DynamoDB)  │ eventos │ (PostgreSQL) │\n└──────────────┘         └──────────────┘",
+        "tip": "No meu projeto, aplico separando interfaces:",
+        "table": {
+          "headers": [
+            "Situação",
+            "Padrão"
+          ],
+          "rows": [
+            [
+              "CRUD simples",
+              "Nem CQS (normal)"
+            ],
+            [
+              "Separar leitura/escrita logicamente",
+              "CQS"
+            ],
+            [
+              "Alto volume de leitura vs escrita",
+              "CQRS"
+            ],
+            [
+              "Event Sourcing",
+              "CQRS (obrigatório)"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "section-4",
+    "title": "💾 4. BANCO DE DADOS",
+    "questions": [
+      {
+        "id": "q-4-0",
+        "title": "Qual a diferença entre banco de dados relacional e não-relacional e quando utilizar cada um?",
+        "tags": [
+          "básico"
+        ],
+        "content": "Esta é uma pergunta fundamental para arquitetura:\n**Bancos Relacionais (SQL):**\nOrganizam dados em tabelas com linhas e colunas, relacionadas por chaves.\nCaracterísticas:\n- Schema fixo e estruturado\n- Garantias ACID\n- SQL para queries complexas\n- Joins eficientes\n- Integridade referencial\nExemplos: PostgreSQL, MySQL, Oracle, SQL Server\n**Quando usar:**\n- Dados altamente estruturados\n- Transações financeiras (ACID é crítico)\n- Relatórios complexos com muitos joins\n- Relacionamentos complexos entre entidades\n- Quando consistência imediata é necessária\n**Bancos Não-Relacionais (NoSQL):**\nVárias categorias com modelos diferentes:\nCaracterísticas:\n- Schema flexível\n- Eventual consistency (geralmente)\n- Escala horizontal mais fácil\n- Otimizado para padrões específicos de acesso\n**Quando usar:**\n- Dados semi ou não estruturados (logs, documentos)\n- Alta escala de escrita\n- Esquema que muda frequentemente\n- Quando eventual consistency é aceitável\n- Cache de alta performance\n**No meu projeto ConsignadoHub:**\nUso PostgreSQL (relacional) porque:\n- Dados de clientes são estruturados\n- Preciso de ACID para transações financeiras\n- Relatórios com joins são importantes\nPara Event Sourcing (futuro), usaria DynamoDB (NoSQL) pelo alto throughput de escrita.",
+        "table": {
+          "headers": [
+            "Tipo",
+            "Exemplos",
+            "Uso"
+          ],
+          "rows": [
+            [
+              "Documentos",
+              "MongoDB, Couchbase",
+              "Dados semi-estruturados"
+            ],
+            [
+              "Chave-Valor",
+              "Redis, DynamoDB",
+              "Cache, sessões"
+            ],
+            [
+              "Colunar",
+              "Cassandra, HBase",
+              "Analytics, séries temporais"
+            ],
+            [
+              "Grafos",
+              "Neo4j",
+              "Relacionamentos complexos"
+            ]
+          ]
+        },
+        "tip": "No meu projeto ConsignadoHub:"
+      },
+      {
+        "id": "q-4-1",
+        "title": "Explique transações ACID.",
+        "tags": [
+          "básico",
+          "importante"
+        ],
+        "content": "ACID é um acrônimo que define as propriedades que garantem confiabilidade em transações de banco de dados:\n**A - Atomicidade (Atomicity):**\nTudo ou nada. Uma transação é indivisível. Se qualquer parte falha, toda a transação é revertida.\nExemplo prático:\n**C - Consistência (Consistency):**\nA transação leva o banco de um estado válido para outro estado válido. Todas as regras de integridade são respeitadas.\nExemplo: Se tenho uma constraint de saldo >= 0, a transação que deixaria saldo negativo falha.\n**I - Isolamento (Isolation):**\nTransações concorrentes não interferem umas nas outras. É como se cada uma executasse sozinha.\nNíveis de isolamento (do mais permissivo ao mais restritivo):\n- READ UNCOMMITTED: Vê dados não commitados (sujeira)\n- READ COMMITTED: Só vê dados commitados\n- REPEATABLE READ: Leituras consistentes na mesma transação\n- SERIALIZABLE: Como se executasse em série\n**D - Durabilidade (Durability):**\nUma vez que a transação é commitada, ela persiste mesmo em caso de falha do sistema (queda de energia, crash).\n**No Spring:**",
+        "code": "@Transactional\npublic void transferir(Conta origem, Conta destino, BigDecimal valor) {\n    origem.debitar(valor);  // Se isso OK mas...\n    destino.creditar(valor); // ...isso falhar, origem é revertido\n}"
+      },
+      {
+        "id": "q-4-2",
+        "title": "O que é o problema N+1 e como resolver?",
+        "tags": [
+          "básico",
+          "importante"
+        ],
+        "content": "O problema N+1 é um dos bugs de performance mais comuns em aplicações com ORM (JPA/Hibernate).\n**O problema:**\nQuando tenho uma relação lazy e acesso os itens relacionados em um loop:\nSe tenho 100 pedidos: 1 query inicial + 100 queries para buscar cada cliente = 101 queries!\n**Soluções:**\n**1. JOIN FETCH (JPQL):**\n**2. @EntityGraph:**\n**3. @BatchSize:**\n**4. Projections/DTOs:**\n**Como detectar:**\n- Logs de SQL com `show-sql: true`\n- Ferramentas como P6Spy\n- APM (Application Performance Monitoring)",
+        "code": "@Query(\"SELECT new com.app.dto.PedidoResumo(p.id, c.nome) FROM Pedido p JOIN p.cliente c\")\nList<PedidoResumo> findResumos();"
+      }
+    ]
+  },
+  {
+    "id": "section-5",
+    "title": "📬 5. MENSAGERIA",
+    "questions": [
+      {
+        "id": "q-5-0",
+        "title": "Como funciona um sistema de mensageria?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "Um sistema de mensageria permite comunicação assíncrona entre aplicações através de filas ou tópicos. É fundamental em arquiteturas distribuídas.\n**Funcionamento básico:**\n1. **Produtor** envia mensagem para o broker\n2. **Broker** armazena a mensagem (persistência opcional)\n3. **Consumidor** busca/recebe mensagens no seu ritmo\n4. **Acknowledgment** confirma processamento\n**Vantagens:**\n**Exemplo prático no consignado:**\nSem mensageria, o ContratoService teria que chamar cada um desses serviços sincronamente, acoplando tudo.",
+        "code": "ContratoService publica \"ContratoAssinado\"\n    │\n    ├──► NotificacaoService: Envia email\n    ├──► AverbacaoService: Inicia processo no INSS\n    └──► AuditoriaService: Registra log",
+        "table": {
+          "headers": [
+            "Benefício",
+            "Descrição"
+          ],
+          "rows": [
+            [
+              "Desacoplamento",
+              "Produtor não conhece consumidor"
+            ],
+            [
+              "Resiliência",
+              "Mensagens sobrevivem a falhas"
+            ],
+            [
+              "Escalabilidade",
+              "Adicionar consumidores sob demanda"
+            ],
+            [
+              "Buffer",
+              "Absorve picos de carga"
+            ],
+            [
+              "Assíncrono",
+              "Não bloqueia o produtor"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "q-5-1",
+        "title": "Qual a diferença entre RabbitMQ e Kafka?",
+        "tags": [
+          "básico"
+        ],
+        "content": "São ferramentas diferentes para problemas diferentes:\n**RabbitMQ:**\n- Message Broker tradicional baseado em AMQP\n- Modelo: fila de mensagens\n- Mensagens são removidas após consumo\n- Roteamento flexível com exchanges\n- Garantia de entrega por mensagem\n**Ideal para:**\n- Comunicação entre microsserviços\n- Filas de trabalho (work queues)\n- RPC assíncrono\n- Quando precisa de roteamento complexo\n**Kafka:**\n- Plataforma de streaming distribuído\n- Modelo: log append-only\n- Mensagens mantidas por período configurável (retention)\n- Múltiplos consumidores podem ler mesma mensagem\n- Otimizado para throughput massivo\n**Ideal para:**\n- Event sourcing\n- Logs e métricas\n- Processamento de streams em tempo real\n- Quando precisa de replay de eventos\n- Alta escala (milhões de mensagens/segundo)\n**Comparação:**\n**Minha escolha:**\n- Comunicação microserviços simples → RabbitMQ\n- Event Sourcing, analytics, alta escala → Kafka",
+        "table": {
+          "headers": [
+            "Aspecto",
+            "RabbitMQ",
+            "Kafka"
+          ],
+          "rows": [
+            [
+              "Modelo",
+              "Message Queue",
+              "Event Log"
+            ],
+            [
+              "Retention",
+              "Até consumir",
+              "Configurável (dias/semanas)"
+            ],
+            [
+              "Throughput",
+              "Alto",
+              "Muito alto"
+            ],
+            [
+              "Replay",
+              "Não (padrão)",
+              "Sim"
+            ],
+            [
+              "Complexidade",
+              "Menor",
+              "Maior"
+            ],
+            [
+              "Caso de uso",
+              "Mensageria",
+              "Streaming"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "q-5-2",
+        "title": "Explique os conceitos de fila e tópico em mensageria.",
+        "tags": [
+          "básico"
+        ],
+        "content": "**Fila (Queue) - Modelo Ponto-a-Ponto:**\nCada mensagem é consumida por apenas um consumidor, mesmo que existam vários consumidores escutando.\nÚtil para: Distribuir trabalho entre workers. Se tenho 1000 tarefas e 10 workers, cada um processa ~100.\n**Tópico (Topic) - Modelo Pub/Sub:**\nUma mensagem é entregue a TODOS os consumidores inscritos.\nÚtil para: Broadcasting de eventos. Quando \"ContratoAssinado\" acontece, vários serviços precisam reagir.\n**No RabbitMQ:**\n- Fila: tipo de exchange \"direct\" ou \"default\"\n- Tópico: exchange tipo \"fanout\" ou \"topic\"\n**No Kafka:**\n- Tudo é tópico, mas com consumer groups posso simular fila (só um consumer do grupo processa cada mensagem)",
+        "code": "                      ┌──► Consumidor 1 (recebe cópia)\nProdutor ──► [Tópico]─┼──► Consumidor 2 (recebe cópia)\n                      └──► Consumidor 3 (recebe cópia)"
+      },
+      {
+        "id": "q-5-3",
+        "title": "Como garantir que mensagens sejam processadas com sucesso?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "Garantir processamento confiável requer várias estratégias:\n**1. Acknowledgment (ACK):**\nSó confirmo recebimento após processar com sucesso. Se der erro, a mensagem volta para a fila.\n**2. Dead Letter Queue (DLQ):**\nMensagens que falharam após múltiplas tentativas vão para uma fila especial para análise posterior.\n**3. Retry Policies com Backoff Exponencial:**\nPrimeira tentativa imediata, segunda após 1s, terceira após 2s, quarta após 4s...\n**4. Idempotência:**\nProcessar a mesma mensagem múltiplas vezes não causa efeitos colaterais. Uso IDs únicos:\n**5. Transações (Outbox Pattern):**\nGarante atomicidade entre salvar no banco e publicar mensagem:",
+        "code": "@Transactional\npublic void criarContrato(Contrato contrato) {\n    repository.save(contrato);\n    outboxRepository.save(new Outbox(\"ContratoEvent\", contrato));\n    // Processo separado publica do Outbox para Kafka\n}"
+      }
+    ]
+  },
+  {
+    "id": "section-6",
+    "title": "☕ 6. JAVA CORE E COLLECTIONS",
+    "questions": [
+      {
+        "id": "q-6-0",
+        "title": "Explique a diferença entre List, Set e Map.",
+        "tags": [
+          "básico"
+        ],
+        "content": "**List:**\nColeção ordenada que permite elementos duplicados e acesso por índice.\nImplementações:\n- **ArrayList:** Acesso rápido O(1), inserção no meio O(n)\n- **LinkedList:** Inserção rápida O(1) no início/fim, acesso O(n)\n**Set:**\nColeção que não permite duplicatas.\nImplementações:\n- **HashSet:** Sem ordem, mais rápido\n- **LinkedHashSet:** Mantém ordem de inserção\n- **TreeSet:** Ordenado naturalmente ou por comparator\n**Map:**\nArmazena pares chave-valor, onde as chaves são únicas.\nImplementações:\n- **HashMap:** Mais comum, sem ordem\n- **LinkedHashMap:** Mantém ordem de inserção\n- **TreeMap:** Ordenado por chave",
+        "code": "Map<CPF, Cliente> clientes = new HashMap<>();\nclientes.put(cpf, cliente);\nCliente c = clientes.get(cpf);"
+      },
+      {
+        "id": "q-6-1",
+        "title": "O que são exceções tratáveis e não tratáveis?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "Java divide exceções em duas categorias principais:\n**Checked Exceptions (Tratáveis):**\n- Herdam de `Exception` (exceto RuntimeException)\n- Compilador OBRIGA tratamento (try/catch ou throws)\n- Representam problemas recuperáveis\n- Exemplos: `IOException`, `SQLException`, `FileNotFoundException`\n**Unchecked Exceptions (Não Tratáveis):**\n- Herdam de `RuntimeException`\n- Compilador NÃO obriga tratamento\n- Geralmente indicam erros de programação\n- Exemplos: `NullPointerException`, `IllegalArgumentException`, `IndexOutOfBoundsException`\n**Best Practices:**\n1. **Use Unchecked para erros de domínio:**\n2. **Wrapped Exceptions:**\n3. **Não use exceções para fluxo de controle:**",
+        "code": "// Ruim\ntry {\n    return lista.get(0);\n} catch (IndexOutOfBoundsException e) {\n    return null;\n}\n\n// Bom\nreturn lista.isEmpty() ? null : lista.get(0);"
+      }
+    ]
+  },
+  {
+    "id": "section-7",
+    "title": "🌐 7. HTTP, REST E COMUNICAÇÃO",
+    "questions": [
+      {
+        "id": "q-7-0",
+        "title": "Quais são os principais métodos HTTP e quando usar cada um?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**O que é idempotência?**\nExecutar a mesma operação múltiplas vezes produz o mesmo resultado.\n**Por que idempotência importa?**\nEm sistemas distribuídos, retries são comuns. Se o cliente não recebe resposta (timeout), ele reenvia. Com operações idempotentes, reenviar é seguro.",
+        "table": {
+          "headers": [
+            "Método",
+            "Ação",
+            "Idempotente?",
+            "Exemplo"
+          ],
+          "rows": [
+            [
+              "**GET**",
+              "Buscar/Ler",
+              "✅ Sim",
+              "`GET /clientes/123`"
+            ],
+            [
+              "**POST**",
+              "Criar",
+              "❌ Não",
+              "`POST /clientes` (body com dados)"
+            ],
+            [
+              "**PUT**",
+              "Atualizar completo",
+              "✅ Sim",
+              "`PUT /clientes/123` (substitui tudo)"
+            ],
+            [
+              "**PATCH**",
+              "Atualizar parcial",
+              "✅ Sim",
+              "`PATCH /clientes/123` (só campos enviados)"
+            ],
+            [
+              "**DELETE**",
+              "Remover",
+              "✅ Sim",
+              "`DELETE /clientes/123`"
+            ]
+          ]
+        },
+        "code": "PUT /clientes/123 { \"nome\": \"João\" }  → Sempre deixa nome = João\nPUT /clientes/123 { \"nome\": \"João\" }  → Mesmo resultado (idempotente)\n\nPOST /clientes { \"nome\": \"João\" }  → Cria cliente ID 1\nPOST /clientes { \"nome\": \"João\" }  → Cria cliente ID 2 (NÃO idempotente)"
+      },
+      {
+        "id": "q-7-1",
+        "title": "Quais são os principais códigos de status HTTP?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Códigos que uso no ConsignadoHub:**\n| Situação | Código | Por quê |\n|----------|--------|---------|\n| Cliente cadastrado | `201 Created` | Recurso criado |\n| Cliente encontrado | `200 OK` | Sucesso |\n| CPF inválido | `422 Unprocessable` | Dados válidos sintaticamente, mas inválidos semanticamente |\n| Cliente não encontrado | `404 Not Found` | Recurso não existe |\n| CPF já cadastrado | `409 Conflict` | Conflito de negócio |\n| Erro interno | `500 Internal` | Algo quebrou no servidor |",
+        "table": {
+          "headers": [
+            "Faixa",
+            "Categoria",
+            "Códigos Comuns"
+          ],
+          "rows": [
+            [
+              "**2xx**",
+              "Sucesso",
+              "200 OK, 201 Created, 204 No Content"
+            ],
+            [
+              "**3xx**",
+              "Redirecionamento",
+              "301 Moved, 304 Not Modified"
+            ],
+            [
+              "**4xx**",
+              "Erro do Cliente",
+              "400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict, 422 Unprocessable"
+            ],
+            [
+              "**5xx**",
+              "Erro do Servidor",
+              "500 Internal Error, 502 Bad Gateway, 503 Service Unavailable"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "q-7-2",
+        "title": "O que é REST e quais são as boas práticas?",
+        "tags": [
+          "básico"
+        ],
+        "content": "REST (Representational State Transfer) é um estilo arquitetural para APIs.\n**Princípios REST:**\n1. **Stateless:** Cada request contém toda informação necessária (sem sessão no servidor)\n2. **Client-Server:** Separação clara\n3. **Uniform Interface:** URLs representam recursos, verbos HTTP representam ações\n4. **Cacheable:** Respostas podem ser cacheadas\n**Boas práticas de URLs:**\n**Boas práticas de resposta:**",
+        "code": "// Sucesso\n{\n  \"id\": \"123\",\n  \"cpf\": \"529.982.247-25\",\n  \"nome\": \"Maria Silva\"\n}\n\n// Erro padronizado\n{\n  \"code\": \"CPF_INVALIDO\",\n  \"message\": \"CPF deve ter 11 dígitos\",\n  \"field\": \"cpf\",\n  \"timestamp\": \"2026-01-08T10:00:00\"\n}"
+      },
+      {
+        "id": "q-7-3",
+        "title": "Quando usar comunicação síncrona vs assíncrona?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Use SÍNCRONA quando:**\n- Precisa de resposta imediata\n- Operação simples e rápida\n- Validação que bloqueia o fluxo\n- UI esperando resposta\n**Exemplos:**\n**Use ASSÍNCRONA quando:**\n- Operação demorada (segundos/minutos)\n- Não precisa de resposta imediata\n- Desacoplar serviços\n- Alta carga (buffer de mensagens)\n- Múltiplos consumidores do mesmo evento\n**Exemplos:**\n**Decisão no ConsignadoHub:**\n| Operação | Tipo | Por quê |\n|----------|------|---------|\n| Cadastrar cliente | Síncrono | UI espera confirmação |\n| Buscar cliente | Síncrono | Precisa do dado agora |\n| Simular empréstimo | Síncrono | Mostra resultado na tela |\n| Enviar email | Assíncrono | Pode demorar, não bloqueia |\n| Notificar INSS | Assíncrono | Serviço externo, desacopla |\n| Processar averbação | Assíncrono | Processo longo |",
+        "table": {
+          "headers": [
+            "Aspecto",
+            "Síncrona (REST/gRPC)",
+            "Assíncrona (Kafka/RabbitMQ)"
+          ],
+          "rows": [
+            [
+              "**Resposta**",
+              "Imediata",
+              "Eventual"
+            ],
+            [
+              "**Acoplamento**",
+              "Alto",
+              "Baixo"
+            ],
+            [
+              "**Disponibilidade**",
+              "Depende do destino",
+              "Desacoplado"
+            ],
+            [
+              "**Complexidade**",
+              "Menor",
+              "Maior"
+            ],
+            [
+              "**Rastreabilidade**",
+              "Fácil",
+              "Requer correlationId"
+            ]
+          ]
+        },
+        "code": "ContratoAssinado → [Kafka] → EmailService (envia email)\n                          → AuditoriaService (registra log)\n                          → INSSService (averba)"
+      },
+      {
+        "id": "q-7-4",
+        "title": "O que acontece se o serviço destino estiver fora do ar?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Comunicação Síncrona:**\n- Request falha imediatamente\n- Cliente recebe erro 5xx\n- Precisa de: Circuit Breaker, Retry, Fallback\n**Comunicação Assíncrona:**\n- Mensagem fica na fila esperando\n- Consumer processa quando voltar\n- Sistema origem não é afetado\n**Por isso, para integrações externas (INSS, bancos), prefiro assíncrono** - não fico refém da disponibilidade do outro sistema.",
+        "code": "Produtor → [Fila] → Consumer (offline)\n                    ↓\n           Mensagem espera\n                    ↓\n           Consumer volta → Processa"
+      },
+      {
+        "id": "q-7-5",
+        "title": "Diferença entre REST e gRPC?",
+        "tags": [
+          "básico"
+        ],
+        "content": "**Quando usar REST:**\n- APIs públicas\n- Integração com frontend\n- Quando legibilidade importa\n- Time não conhece gRPC\n**Quando usar gRPC:**\n- Comunicação interna entre microserviços\n- Alta performance necessária\n- Streaming de dados\n- Contratos fortemente tipados",
+        "table": {
+          "headers": [
+            "Aspecto",
+            "REST",
+            "gRPC"
+          ],
+          "rows": [
+            [
+              "Protocolo",
+              "HTTP/1.1 (texto)",
+              "HTTP/2 (binário)"
+            ],
+            [
+              "Formato",
+              "JSON (legível)",
+              "Protocol Buffers (compacto)"
+            ],
+            [
+              "Performance",
+              "Boa",
+              "Excelente"
+            ],
+            [
+              "Streaming",
+              "Limitado",
+              "Bidirecional nativo"
+            ],
+            [
+              "Contrato",
+              "OpenAPI/Swagger",
+              ".proto files"
+            ],
+            [
+              "Browser",
+              "✅ Suportado",
+              "⚠️ Limitado"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "section-8",
+    "title": "🍃 8. SPRING FRAMEWORK",
+    "questions": [
+      {
+        "id": "q-8-0",
+        "title": "O que é Inversão de Controle (IoC) e Injeção de Dependência (DI)?",
+        "tags": [
+          "básico",
+          "importante"
+        ],
+        "content": "**Inversão de Controle (IoC):**\nÉ um princípio onde o controle da criação e gerenciamento de objetos é \"invertido\". Em vez de eu criar os objetos que preciso, um container externo (no caso, o Spring) faz isso por mim.\nSem IoC:\nCom IoC:\n**Injeção de Dependência (DI):**\nÉ a FORMA como o IoC é implementado. O container injeta as dependências necessárias nas classes.\n**Tipos de injeção:**\n1. **Por Construtor (Preferido):**\nVantagens: imutabilidade, dependências explícitas, fácil de testar, falha rápida.\n2. **Por Setter:**\nQuando usar: dependências opcionais.\n3. **Por Campo (Evitar):**\nDesvantagens: difícil de testar, dependências ocultas.\n**Por que usar DI:**\n- Desacoplamento\n- Testabilidade (posso injetar mocks)\n- Configuração centralizada\n- Código mais limpo",
+        "code": "@Service\npublic class ClienteService {\n    @Autowired\n    private ClienteRepository repository;\n}"
+      }
+    ]
+  },
+  {
+    "id": "section-9",
+    "title": "🧪 9. TESTES",
+    "questions": [
+      {
+        "id": "q-9-0",
+        "title": "O que é TDD e como você aplica?",
+        "tags": [
+          "básico",
+          "importante"
+        ],
+        "content": "TDD (Test-Driven Development) é uma metodologia onde escrevemos o teste ANTES da implementação.\n**Ciclo TDD:**\n1. 🔴 **RED:** Escrever um teste que falha\n2. 🟢 **GREEN:** Escrever o mínimo de código para passar\n3. 🔵 **REFACTOR:** Melhorar o código mantendo testes verdes\n**Exemplo prático no meu projeto:**\n**Benefícios que experimento:**\n- Código testável por design\n- Documentação viva (testes explicam comportamento)\n- Confiança para refatorar\n- Menos bugs em produção\n**No ConsignadoHub:** 78 testes, todos escritos antes da implementação.",
+        "code": "// 1. RED - Teste primeiro\n@Test\nvoid deveCriarCPFValido() {\n    CPF cpf = new CPF(\"52998224725\");\n    assertThat(cpf.valor()).isEqualTo(\"52998224725\");\n}\n\n@Test\nvoid deveRejeitarCPFNulo() {\n    assertThatThrownBy(() -> new CPF(null))\n        .isInstanceOf(DomainException.class);\n}\n\n// Testes falham porque CPF não existe ainda\n\n// 2. GREEN - Implementação mínima\npublic record CPF(String valor) {\n    public CPF {\n        if (valor == null) throw DomainException.required(\"cpf\");\n    }\n}\n\n// Testes passam!\n\n// 3. REFACTOR - Melhorar\npublic record CPF(String valor) {\n    public CPF {\n        if (valor == null) throw DomainException.required(\"cpf\");\n        valor = valor.replaceAll(\"[^0-9]\", \"\"); // Remove formatação\n        if (!isValid(valor)) throw DomainException.invalidField(\"cpf\", \"inválido\");\n    }\n}",
+        "tip": "No ConsignadoHub: 78 testes, todos escritos antes da implementação."
+      }
+    ]
+  },
+  {
+    "id": "section-10",
+    "title": "🐳 10. DEVOPS E DEPLOY",
+    "questions": [
+      {
+        "id": "q-10-0",
+        "title": "Boas práticas para deploy seguro",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**1. Feature Flags:**\nCódigo vai para produção DESLIGADO. Posso ligar/desligar sem redeploy.\n**2. Canary Release:**\nLibera para percentual pequeno de usuários primeiro:\n- 1% por 1 hora\n- 10% por 4 horas\n- 50% por 1 dia\n- 100%\nSe métricas degradarem, faz rollback automático.\n**3. Blue/Green Deployment:**\nDois ambientes idênticos. Deploy no ambiente inativo, troca o roteamento.\n**4. Health Checks:**\nKubernetes/Load balancer só roteia para instâncias saudáveis.\n**5. Circuit Breaker:**\nSe dependência está degradada, falha rápido em vez de timeout.\n**6. Rollback Automatizado:**\nSe taxa de erro aumentar após deploy, reverte automaticamente.\n**7. Smoke Tests Pós-Deploy:**\nTestes automáticos que validam funcionalidades críticas após deploy.",
+        "code": "livenessProbe:\n  httpGet:\n    path: /actuator/health/liveness\n    port: 8080\nreadinessProbe:\n  httpGet:\n    path: /actuator/health/readiness\n    port: 8080"
+      },
+      {
+        "id": "q-10-1",
+        "title": "Como funciona o versionamento de aplicações? (Semantic Versioning)",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "Uso Semantic Versioning (SemVer) no formato `MAJOR.MINOR.PATCH`:\n**Quando incrementar cada número:**\n**Regras importantes:**\n- Quando incrementa MINOR, PATCH volta para 0\n- Quando incrementa MAJOR, MINOR e PATCH voltam para 0\n- Adicionar campo opcional é MINOR (não quebra)\n- Remover campo é MAJOR (quebra)\n**Versões especiais:**\n| Sufixo | Significado | Exemplo |\n|--------|-------------|---------|\n| `-SNAPSHOT` | Em desenvolvimento | `1.5.0-SNAPSHOT` |\n| `-alpha` | Muito instável | `2.0.0-alpha.1` |\n| `-beta` | Testando features | `2.0.0-beta.3` |\n| `-RC` | Release Candidate | `2.0.0-RC1` |\n**Resposta resumida para entrevista:**\n*\"Uso Semantic Versioning - MAJOR.MINOR.PATCH. PATCH para bug fixes, MINOR para features novas que são backward compatible, MAJOR para breaking changes. Por exemplo, se adiciono um campo opcional na API, é MINOR. Se removo um campo, é MAJOR porque quebra clientes existentes. No CI/CD, usamos tags no Git (v1.2.3) e o pipeline faz o build automaticamente.\"*",
+        "code": "  2  .  1  .  3\n  │     │     │\n  │     │     └── PATCH: Bug fixes (correções)\n  │     └──────── MINOR: Novas features (sem quebrar)\n  └────────────── MAJOR: Breaking changes (quebra compatibilidade)",
+        "table": {
+          "headers": [
+            "Situação",
+            "Exemplo",
+            "Por quê"
+          ],
+          "rows": [
+            [
+              "**PATCH** (1.0.0 → 1.0.1)",
+              "Fix de null pointer",
+              "Bug fix, não muda comportamento"
+            ],
+            [
+              "**MINOR** (1.0.1 → 1.1.0)",
+              "Novo endpoint",
+              "Nova feature, compatível com versão anterior"
+            ],
+            [
+              "**MAJOR** (1.1.0 → 2.0.0)",
+              "Removeu campo obrigatório",
+              "Breaking change, quebra clientes existentes"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "section-11",
+    "title": "💡 11. PERGUNTAS COMPORTAMENTAIS",
+    "questions": [
+      {
+        "id": "q-11-0",
+        "title": "Me fale sobre um desafio técnico que você resolveu",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Resposta 1 - Consolidação de Exceções:**\n*\"No meu projeto de crédito consignado, enfrentei o desafio de ter 16 classes de exceção diferentes - InvalidCPFException, InvalidEmailException, etc. Cada Value Object tinha sua própria exceção.*\n*O problema é que isso gerava muito código duplicado e dificultava o tratamento centralizado de erros.*\n*A solução foi consolidar em apenas 3 exceções com factory methods: DomainException, BusinessException e NotFoundException. Cada uma com código de erro padronizado.*\n*O aprendizado foi que às vezes menos classes é melhor - códigos de erro bem definidos são mais flexíveis que hierarquias de exceção complexas.\"*\n**Resposta 2 - Bug de CPF com Zeros à Esquerda:**\n*\"Tínhamos um bug onde clientes do Norte/Nordeste não conseguiam se cadastrar. O erro era 'CPF inválido'.*\n*Descobri que CPFs que começam com zero estavam perdendo o zero quando salvos como número no banco. Quando reconstituído, virava 10 dígitos em vez de 11.*\n*A solução foi usar String em vez de Long, criar um Value Object imutável que sempre mantém os zeros, e adicionar testes específicos.*\n*Aprendi que CPF, CNPJ e CEP devem sempre ser tratados como Strings.\"*\n**Resposta 3 - Problema N+1:**\n*\"O endpoint de listar clientes demorava 3 segundos para 100 registros. Em produção com 10.000, dava timeout.*\n*Habilitei logs de SQL e vi 101 queries - o clássico problema N+1. Para cada cliente, uma query buscando benefícios.*\n*A solução foi usar JOIN FETCH e @EntityGraph. Para listagens simples, criei DTOs de projeção.*\n*Tempo caiu de 3s para 50ms. Aprendi a sempre monitorar queries quando uso ORM.\"*\n**Resposta 4 - Transação Sem Rollback:**\n*\"Clientes eram cadastrados mesmo quando o envio de email falhava. Deveria ser atômico.*\n*O método tinha @Transactional, mas a exceção era IOException (checked). Spring só faz rollback para RuntimeException por padrão.*\n*Adicionei rollbackFor = Exception.class e refatorei exceções de domínio para RuntimeException.*\n*Criei uma regra: exceções de ",
+        "tip": "No meu projeto de crédito consignado, enfrentei o desafio de ter 16 classes de exceção diferentes - InvalidCPFException, InvalidEmailException, etc. Cada Value Object tinha sua própria exceção."
+      },
+      {
+        "id": "q-11-1",
+        "title": "O que você aprendeu recentemente?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Resposta modelo:**\n*\"Recentemente desenvolvi um projeto completo de crédito consignado INSS onde aprendi a aplicar vários conceitos na prática:*\n*Arquitetura Hexagonal - separei claramente Domain, Application e Adapters. O domínio não conhece Spring ou JPA.*\n*TDD rigoroso - 78 testes, todos escritos antes da implementação. Isso me deu confiança para refatorar.*\n*CQS vs CQRS - entendi a diferença prática. CQS é separar interfaces de leitura/escrita no mesmo banco. CQRS é ter bancos diferentes.*\n*Tratamento de exceções enterprise - consolidar exceções com códigos padronizados em vez de muitas classes.*\n*O maior aprendizado foi que teoria só se consolida com prática. Eu conhecia esses conceitos, mas implementar do zero mostrou os trade-offs reais.\"*"
+      },
+      {
+        "id": "q-11-2",
+        "title": "💡 Dicas para Contar Desafios Técnicos",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "1. **Use a estrutura STAR:** Situação, Tarefa, Ação, Resultado\n2. **Seja específico com números:** \"caiu de 3s para 50ms\" é convincente\n3. **Mostre aprendizado:** O que você levou para projetos futuros\n4. **Não invente tecnologias que não conhece:** Você será questionado\n5. **Prepare 3-4 histórias:** Diferentes tipos de problemas (performance, bugs, arquitetura)"
+      }
+    ]
+  },
+  {
+    "id": "section-13",
+    "title": "⚖️ 13. PERGUNTAS DE DECISÃO (TRADE-OFFS)",
+    "questions": [
+      {
+        "id": "q-13-0",
+        "title": "Monolito vs Microserviços - quando migrar?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Comece com Monolito quando:**\n- MVP, prova de conceito\n- Time pequeno (< 10 devs)\n- Domínio não está bem definido\n- Não tem observabilidade madura\n**Migre para Microserviços quando:**\n- Times precisam de autonomia\n- Partes do sistema têm escalas muito diferentes\n- Deploy independente é crítico\n- Já entende bem os bounded contexts\n**No ConsignadoHub:**\n*\"Comecei como monolito modular. Cada módulo (customer, simulation, contract) é um bounded context separado. Quando precisar escalar, extraio para microserviço sem reescrever - a separação já existe.\"*",
+        "tip": "No ConsignadoHub:"
+      },
+      {
+        "id": "q-13-1",
+        "title": "Herança vs Composição - quando usar cada?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Use Herança quando:**\n- Existe relação \"é um\" clara (ContaCorrente É UMA Conta)\n- Quer compartilhar implementação entre subclasses\n- Hierarquia é estável e não vai mudar muito\n**Use Composição quando:**\n- Existe relação \"tem um\" (Cliente TEM Endereço)\n- Precisa de flexibilidade (trocar comportamento em runtime)\n- Quer evitar acoplamento forte\n**Regra geral:** Prefira composição. Use herança só quando realmente faz sentido.",
+        "code": "// Herança: \"é um\"\nclass ContaCorrente extends Conta { }\n\n// Composição: \"tem um\"\nclass Cliente {\n    private Endereco endereco;  // Composto, não herdado\n    private List<Beneficio> beneficios;\n}"
+      },
+      {
+        "id": "q-13-2",
+        "title": "Exception vs Optional - quando usar cada?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Lance Exception quando:**\n- Situação é realmente excepcional\n- Não deveria acontecer em fluxo normal\n- É um erro de programação ou violação de regra\n**Retorne Optional quando:**\n- Ausência de valor é esperada e válida\n- Método de busca que pode não encontrar\n- Quero forçar o chamador a tratar o caso vazio\n**No ConsignadoHub:**\n- `buscarPorCpf()` → Retorna `Optional` (pode não existir)\n- Validação de CPF inválido → Lança `DomainException` (erro)",
+        "code": "Optional<Cliente> buscarPorCpf(CPF cpf);\n\n// Chamador é obrigado a tratar\ncliente.orElseThrow(() -> NotFoundException.cliente(cpf));",
+        "tip": "No ConsignadoHub:"
+      },
+      {
+        "id": "q-13-3",
+        "title": "DTO vs Entity direto na API - por que usar DTO?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Problemas de expor Entity direto:**\n- Vaza estrutura interna do domínio\n- Mudança no banco quebra a API\n- Serializa relacionamentos indesejados (N+1)\n- Campos sensíveis expostos (senha, tokens)\n**Benefícios do DTO:**\n- Contrato de API estável\n- Controle do que é exposto\n- Evita serialização de lazy loading\n- Pode ter formato diferente do domínio\n**No ConsignadoHub:**\n*\"Uso Commands (entrada) e Responses (saída). O Controller converte DTO → Domain e Domain → DTO via Mappers.\"*",
+        "code": "// DTO de entrada (Command)\nrecord CadastrarClienteRequest(String cpf, String nome, String email);\n\n// DTO de saída (Response)\nrecord ClienteResponse(UUID id, String cpfFormatado, String nome);\n\n// Entity (Domínio) - nunca exposta\nclass Cliente {\n    private ClienteId id;\n    private CPF cpf;\n    private String nome;\n}",
+        "tip": "No ConsignadoHub:"
+      },
+      {
+        "id": "q-13-4",
+        "title": "Lazy vs Eager Loading - qual é o padrão correto?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Padrão: SEMPRE LAZY**\n**Por que Lazy?**\n- Não carrega dados desnecessários\n- Evita N+1 acidental\n- Melhor performance inicial\n**Quando preciso dos dados relacionados:**\n**Regra:** Configure LAZY, use FETCH quando precisar explicitamente.",
+        "code": "// JOIN FETCH quando sei que vou usar\n@Query(\"SELECT c FROM Cliente c JOIN FETCH c.beneficios WHERE c.id = :id\")\nCliente buscarComBeneficios(@Param(\"id\") Long id);\n\n// Ou @EntityGraph\n@EntityGraph(attributePaths = {\"beneficios\"})\nList<Cliente> findAll();"
+      },
+      {
+        "id": "q-13-5",
+        "title": "Cache Local vs Distribuído - quando usar cada?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Use Cache Local quando:**\n- Dados mudam raramente (configurações, taxas)\n- Pode ter inconsistência temporária entre pods\n- Alta frequência de leitura, mesmo dado\n**Use Cache Distribuído quando:**\n- Precisa de consistência entre instâncias\n- Sessão de usuário\n- Dados que mudam frequentemente\n- Rate limiting\n**No ConsignadoHub:**\n*\"Taxas de juros e configurações: cache local (Caffeine) com TTL de 5 minutos. Sessão do atendente: Redis (precisa consistência).\"*",
+        "table": {
+          "headers": [
+            "Aspecto",
+            "Cache Local (Caffeine)",
+            "Cache Distribuído (Redis)"
+          ],
+          "rows": [
+            [
+              "Performance",
+              "Ultra rápida (memória)",
+              "Rápida (rede)"
+            ],
+            [
+              "Consistência",
+              "Por instância",
+              "Compartilhado"
+            ],
+            [
+              "Escalabilidade",
+              "Cada pod tem sua cópia",
+              "Uma fonte de verdade"
+            ],
+            [
+              "Invalidação",
+              "Complexa entre pods",
+              "Simples (centralizado)"
+            ]
+          ]
+        },
+        "tip": "No ConsignadoHub:"
+      },
+      {
+        "id": "q-13-6",
+        "title": "Event Sourcing vs CRUD - quando vale a complexidade?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**CRUD tradicional:**\n- Salva estado atual\n- Histórico limitado (audit log separado)\n- Simples de entender e implementar\n- Maioria dos casos\n**Event Sourcing:**\n- Salva todos os eventos que aconteceram\n- Estado é derivado dos eventos\n- Histórico completo nativo\n- Complexidade maior\n**Use Event Sourcing quando:**\n- Auditoria completa é requisito legal (financeiro)\n- Precisa de \"time travel\" (ver estado em qualquer momento)\n- Eventos são business value (não só técnico)\n- N sistemas reagem aos mesmos eventos\n**Use CRUD quando:**\n- CRUD simples de cadastro\n- Histórico não é crítico\n- Time não tem experiência com ES\n- MVP, precisa entregar rápido\n**No ConsignadoHub:**\n*\"Cadastro de cliente: CRUD (simples, sem requisito de histórico). Contratos financeiros: Event Sourcing (regulação exige trilha de auditoria completa).\"*",
+        "tip": "No ConsignadoHub:"
+      },
+      {
+        "id": "q-13-7",
+        "title": "Saga Choreography vs Orchestration - qual padrão?",
+        "tags": [
+          "avançado"
+        ],
+        "content": "**Choreography (coreografado):**\nCada serviço sabe reagir ao evento anterior.\n**Orchestration (orquestrado):**\nUm serviço central controla o fluxo.\n**Quando usar cada:**\n- **Choreography:** Fluxos simples (3-4 passos), times autônomos\n- **Orchestration:** Fluxos complexos, precisa de visibilidade, compensações elaboradas\n**No ConsignadoHub:**\n*\"Para o fluxo de contratação (contrato → averbação → liberação), usaria Orchestration porque o fluxo é crítico, preciso de visibilidade clara, e as compensações são complexas.\"*",
+        "table": {
+          "headers": [
+            "Aspecto",
+            "Choreography",
+            "Orchestration"
+          ],
+          "rows": [
+            [
+              "Controle",
+              "Descentralizado",
+              "Centralizador"
+            ],
+            [
+              "Acoplamento",
+              "Baixo",
+              "Médio"
+            ],
+            [
+              "Visibilidade",
+              "Difícil de rastrear",
+              "Fluxo claro"
+            ],
+            [
+              "Complexidade",
+              "Distribuída",
+              "Centralizada"
+            ],
+            [
+              "Ponto de falha",
+              "Nenhum central",
+              "Orquestrador"
+            ]
+          ]
+        },
+        "code": "Orquestrador --> ContratoService\n            --> AverbacaoService\n            --> LiberacaoService",
+        "tip": "No ConsignadoHub:"
+      },
+      {
+        "id": "q-13-8",
+        "title": "Record vs Class - quando usar cada?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Record** (Java 14+): Classe imutável para transportar dados.\n**Class tradicional:** Quando precisa de mutabilidade ou comportamento complexo.\n**Quando usar Record:**\n- Value Objects (CPF, Dinheiro, Email)\n- DTOs (Request, Response, Command)\n- Dados imutáveis\n- Quando não precisa de herança\n**Quando usar Class:**\n- Entities com ciclo de vida (Cliente, Contrato)\n- Precisa de mutabilidade\n- Herança é necessária\n- Lógica de negócio complexa\n**No ConsignadoHub:**\n*\"Uso Record para todos os Value Objects (CPF, Dinheiro, Email, DadosBancarios) e DTOs (ClienteResponse, CadastrarClienteCommand). Uso Class para entities como Cliente porque tem ciclo de vida e lógica de negócio.\"*",
+        "code": "public class Cliente {\n    private String nome;\n    \n    public void alterarNome(String novoNome) {\n        this.nome = novoNome;  // Mutável\n    }\n}",
+        "table": {
+          "headers": [
+            "Aspecto",
+            "Record",
+            "Class"
+          ],
+          "rows": [
+            [
+              "Imutabilidade",
+              "✅ Forçada",
+              "❌ Opcional"
+            ],
+            [
+              "Boilerplate",
+              "Mínimo",
+              "Muito (ou Lombok)"
+            ],
+            [
+              "Herança",
+              "❌ Não pode",
+              "✅ Pode"
+            ],
+            [
+              "Serialização",
+              "Simples",
+              "Precisa configurar"
+            ]
+          ]
+        },
+        "tip": "No ConsignadoHub:"
+      }
+    ]
+  },
+  {
+    "id": "section-14",
+    "title": "🚨 14. O QUE FAZER QUANDO... (TROUBLESHOOTING)",
+    "questions": [
+      {
+        "id": "q-14-0",
+        "title": "O que fazer quando uma mensagem Kafka dá erro?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Passo 1: Não perder a mensagem**\n- Usar ACK manual (só confirma após processar)\n- Configurar retry policy\n**Passo 2: Estratégia de retry**\n**Passo 3: Dead Letter Queue (DLQ)**\n- Mensagens que falharam após N tentativas vão para fila especial\n- Análise manual ou automática posterior\n- Alerta para o time investigar\n**Passo 4: Garantir idempotência**\n- Se a mesma mensagem for reprocessada, não causa efeito duplicado\n- Usar campo de controle (idempotencyKey)",
+        "code": "@KafkaListener(topics = \"contratos\")\npublic void processar(ContratoEvent evento) {\n    if (jaProcessado(evento.idempotencyKey())) {\n        log.info(\"Evento já processado, ignorando\");\n        return;\n    }\n    \n    try {\n        service.processar(evento);\n        marcarComoProcessado(evento.idempotencyKey());\n    } catch (Exception e) {\n        log.error(\"Erro processando: {}\", evento, e);\n        throw e;  // Kafka faz retry\n    }\n}"
+      },
+      {
+        "id": "q-14-1",
+        "title": "O que fazer quando você sobe uma alteração com bug para produção?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Passo 1: Identificar impacto (1-2 min)**\n- Quantos usuários afetados?\n- Dados corrompidos?\n- É crítico (financeiro, segurança)?\n**Passo 2: Decisão rápida**\n- **Rollback imediato:** Se impacto alto, voltar versão anterior\n- **Hotfix:** Se rollback não é possível, corrigir e deploy rápido\n- **Feature flag:** Se tiver, desligar a feature problemática\n**Passo 3: Comunicação**\n- Avisar time/liderança\n- Se afetou clientes, avisar suporte\n**Passo 4: Fix**\n**Passo 5: Post-mortem (depois)**\n- O que causou?\n- Por que não pegamos antes?\n- Como evitar no futuro?",
+        "code": "1. Reproduzir em ambiente local\n2. Escrever teste que falha (prova do bug)\n3. Corrigir\n4. Teste passa\n5. Deploy com monitoramento extra",
+        "answer": "Primeiro avalio impacto. Se crítico, faço rollback imediato - melhor voltar para versão estável do que deixar produção quebrada. Depois investigo com calma, crio teste que reproduz o bug, corrijo, e faço deploy com monitoramento extra. No dia seguinte, faço post-mortem para melhorar o processo."
+      },
+      {
+        "id": "q-14-2",
+        "title": "O que fazer quando o banco de dados fica lento?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Passo 1: Identificar a query lenta**\n**Passo 2: Analisar com EXPLAIN ANALYZE**\n**Possíveis causas e soluções:**\n**Passo 3: Ações imediatas**\n- Matar query problemática se necessário\n- Reiniciar conexões do pool\n- Escalar leitura (read replicas)",
+        "code": "EXPLAIN ANALYZE SELECT * FROM clientes WHERE cpf = '123';",
+        "table": {
+          "headers": [
+            "Causa",
+            "Diagnóstico",
+            "Solução"
+          ],
+          "rows": [
+            [
+              "Falta de índice",
+              "\"Seq Scan\" em tabela grande",
+              "Criar índice"
+            ],
+            [
+              "Lock",
+              "Muitas transações esperando",
+              "Verificar transações longas"
+            ],
+            [
+              "N+1",
+              "Muitas queries similares",
+              "JOIN FETCH, @BatchSize"
+            ],
+            [
+              "Tabela muito grande",
+              "Milhões de registros",
+              "Paginação, particionamento"
+            ],
+            [
+              "Conexões esgotadas",
+              "Pool cheio",
+              "Aumentar pool, otimizar queries"
+            ]
+          ]
+        },
+        "answer": "Primeiro identifico qual query está lenta com pg_stat_activity. Depois rodo EXPLAIN ANALYZE para ver o plano de execução. Geralmente é falta de índice (Seq Scan) ou problema de N+1. Adiciono índice via migration ou otimizo a query com JOIN FETCH."
+      },
+      {
+        "id": "q-14-3",
+        "title": "O que fazer quando um serviço externo (API) fica fora do ar?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Se comunicação é SÍNCRONA:**\n1. **Circuit Breaker:** Após N falhas, para de tentar\n2. **Timeout:** Não esperar infinitamente\n3. **Fallback:** Retornar valor default ou cached\n**Se comunicação é ASSÍNCRONA:**\n- Mensagem fica na fila esperando\n- Consumer processa quando serviço voltar\n- Sistema origem não é afetado",
+        "code": "@CircuitBreaker(name = \"inss\", fallbackMethod = \"fallback\")\n@Retry(name = \"inss\", maxAttempts = 3)\n@Timeout(value = 5, unit = ChronoUnit.SECONDS)\npublic Averbacao consultar(String cpf) {\n    return inssClient.consultar(cpf);\n}\n\npublic Averbacao fallback(String cpf, Exception e) {\n    log.warn(\"INSS indisponível, usando cache\");\n    return cacheService.buscarUltimaAverbacao(cpf);\n}",
+        "answer": "Uso Circuit Breaker com Resilience4j. Após 5 falhas, o circuito abre e retorna fallback imediatamente por 30 segundos. Isso evita cascata de falhas e timeout desnecessário. Também tenho cache de última consulta bem-sucedida para fallback."
+      },
+      {
+        "id": "q-14-4",
+        "title": "O que fazer quando a aplicação está consumindo muita memória?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Passo 1: Coletar heap dump**\n**Passo 2: Analisar com ferramenta**\n- Eclipse MAT (Memory Analyzer Tool)\n- VisualVM\n- JProfiler\n**Causas comuns:**\n**Passo 3: Monitorar**\n- Configurar alertas de memória (> 80%)\n- Grafana/Prometheus com métricas JVM",
+        "code": "jmap -dump:format=b,file=heap.hprof <PID>",
+        "table": {
+          "headers": [
+            "Causa",
+            "Sintoma",
+            "Solução"
+          ],
+          "rows": [
+            [
+              "Memory leak",
+              "Objetos que nunca são liberados",
+              "Encontrar referência que segura"
+            ],
+            [
+              "Cache sem limite",
+              "Cache cresce infinitamente",
+              "Configurar TTL e tamanho máximo"
+            ],
+            [
+              "Strings duplicadas",
+              "Milhares de Strings iguais",
+              "String.intern() ou pool"
+            ],
+            [
+              "Listas grandes",
+              "Carrega milhões de registros",
+              "Paginação, stream"
+            ]
+          ]
+        },
+        "answer": "Coletaria um heap dump e analisaria com Eclipse MAT. Geralmente é cache sem limite, lista carregando dados demais, ou leak de conexões. Também verifico se o problema é no código ou se preciso aumentar memória da JVM."
+      },
+      {
+        "id": "q-14-5",
+        "title": "O que fazer quando deploy em produção falha no meio?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Prevenção (antes):**\n- Blue/Green deployment\n- Canary release\n- Feature flags\n- Health checks\n**Durante a falha:**\n1. **Rollback automático:** Se health check falha, volta versão anterior\n2. **Se não tem automático:** kubectl rollout undo\n3. **Comunicar:** Avisar time que está revertendo\n**Depois:**\n- Verificar logs do pod que falhou\n- Entender por que passou no staging e falhou em prod\n- Melhorar testes/pipeline",
+        "code": "# Kubernetes: rollback automático\nlivenessProbe:\n  httpGet:\n    path: /actuator/health/liveness\n    port: 8080\n  initialDelaySeconds: 30\n  failureThreshold: 3  # Após 3 falhas, reinicia",
+        "answer": "Primeiro, faço rollback para versão estável - produção tem que funcionar. Depois investigo por que falhou. Geralmente é diferença de ambiente (variáveis, secrets) ou carga de produção que não simulamos. Por isso uso Canary release: deploy para 1% dos usuários primeiro, monitoro, depois expando."
+      },
+      {
+        "id": "q-14-6",
+        "title": "O que fazer quando recebe alerta de muitos erros 500?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Passo 1: Verificar (1-2 min)**\n- Dashboards (Grafana, Datadog)\n- Qual endpoint? Qual serviço?\n- Começou quando?\n**Passo 2: Correlacionar**\n- Houve deploy recente?\n- Dependência externa caiu?\n- Pico de tráfego?\n**Passo 3: Logs**\n**Passo 4: Ação baseada na causa**",
+        "code": "# Buscar erros recentes\nkubectl logs <pod> --since=5m | grep ERROR",
+        "table": {
+          "headers": [
+            "Causa",
+            "Ação"
+          ],
+          "rows": [
+            [
+              "Deploy quebrou",
+              "Rollback"
+            ],
+            [
+              "Dependência fora",
+              "Circuit breaker, fallback"
+            ],
+            [
+              "Pico de tráfego",
+              "Escalar pods"
+            ],
+            [
+              "Bug de código",
+              "Hotfix"
+            ],
+            [
+              "Banco lento",
+              "Matar queries, otimizar"
+            ]
+          ]
+        },
+        "answer": "Verifico imediatamente no Grafana qual endpoint e desde quando. Correlaciono com deploys ou mudanças. Se foi deploy, rollback. Se foi dependência, ativo fallback. Enquanto investigo, comunico o time. Depois de resolver, documento o que aconteceu."
+      }
+    ]
+  },
+  {
+    "id": "section-15",
+    "title": "🔥 15. TÓPICOS AVANÇADOS (NÍVEL SÊNIOR)",
+    "questions": [
+      {
+        "id": "q-15-0",
+        "title": "O que são Virtual Threads (Java 21) e por que são importantes?",
+        "tags": [
+          "avançado"
+        ],
+        "content": "Virtual Threads (Project Loom) são threads leves gerenciadas pela JVM, não pelo Sistema Operacional.\n**Quando usar:**\nOperações I/O-bound (HTTP calls, banco de dados, arquivos). Não para CPU-bound.\n**Exemplo prático:**\n**No ConsignadoHub:**\n*\"Seria perfeito para o serviço que consulta a API do INSS. A thread fica parada esperando resposta HTTP. Com Virtual Threads, poderíamos escalar para milhares de requisições concorrentes sem estourar memória.\"*",
+        "table": {
+          "headers": [
+            "Aspecto",
+            "Thread de Plataforma",
+            "Virtual Thread"
+          ],
+          "rows": [
+            [
+              "Gerenciamento",
+              "Sistema Operacional",
+              "JVM"
+            ],
+            [
+              "Memória",
+              "~1 MB por thread",
+              "Poucos KB"
+            ],
+            [
+              "Quantidade",
+              "Milhares = problema",
+              "Milhões = OK"
+            ],
+            [
+              "Criação",
+              "Custosa",
+              "Barata"
+            ]
+          ]
+        },
+        "code": "// Antes: Thread pool limitado\nExecutorService executor = Executors.newFixedThreadPool(100);\n\n// Depois: Virtual threads ilimitadas\nExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();",
+        "tip": "No ConsignadoHub:"
+      },
+      {
+        "id": "q-15-1",
+        "title": "Qual a diferença entre Optimistic e Pessimistic Locking?",
+        "tags": [
+          "básico"
+        ],
+        "content": "**Optimistic Locking com JPA:**\n**Pessimistic Locking:**\n**No ConsignadoHub:**\n*\"Para reserva de margem consignável, usaria Optimistic Locking com @Version. Se dois atendentes tentarem vender empréstimo na mesma margem ao mesmo tempo, um deles recebe erro e deve tentar novamente. Evita travar o banco desnecessariamente.\"*",
+        "table": {
+          "headers": [
+            "Aspecto",
+            "Optimistic (Otimista)",
+            "Pessimistic (Pessimista)"
+          ],
+          "rows": [
+            [
+              "Quando trava",
+              "No commit",
+              "Na leitura"
+            ],
+            [
+              "Implementação",
+              "`@Version` no JPA",
+              "`SELECT FOR UPDATE`"
+            ],
+            [
+              "Performance",
+              "Melhor (não trava banco)",
+              "Pior (trava registro)"
+            ],
+            [
+              "Conflitos",
+              "Detecta no final",
+              "Previne desde o início"
+            ],
+            [
+              "Uso ideal",
+              "Pouca concorrência",
+              "Muita concorrência"
+            ]
+          ]
+        },
+        "code": "@Query(\"SELECT c FROM Conta c WHERE c.id = :id\")\n@Lock(LockModeType.PESSIMISTIC_WRITE)\nOptional<Conta> findByIdForUpdate(@Param(\"id\") Long id);",
+        "tip": "No ConsignadoHub:"
+      },
+      {
+        "id": "q-15-2",
+        "title": "Quais são os 3 Pilares da Observabilidade?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Logs:**\nEventos textuais. \"Cliente X cadastrado às 10:30\".\n**Métricas:**\nNúmeros agregados. \"500 erros/minuto\", \"p99 latência = 200ms\".\n**Tracing Distribuído:**\nRastreia uma requisição através de múltiplos serviços.\n**Resposta resumida:**\n*\"Os três pilares são Logs, Métricas e Tracing. Logs mostram o que aconteceu, métricas mostram tendências numéricas, e tracing distribuído mostra onde está a lentidão em arquiteturas de microserviços. No Spring Boot, uso Micrometer para exportar métricas para Prometheus.\"*",
+        "table": {
+          "headers": [
+            "Pilar",
+            "O que responde",
+            "Ferramentas"
+          ],
+          "rows": [
+            [
+              "**Logs**",
+              "O que aconteceu?",
+              "ELK Stack, Splunk, CloudWatch"
+            ],
+            [
+              "**Métricas**",
+              "Quanto? Tendência?",
+              "Prometheus + Grafana, Micrometer"
+            ],
+            [
+              "**Tracing**",
+              "Onde está a lentidão?",
+              "Jaeger, Zipkin, OpenTelemetry"
+            ]
+          ]
+        },
+        "code": "Request ID: abc-123\n├── Gateway (5ms)\n├── CustomerService (50ms)\n│   └── PostgreSQL (45ms)  ← Gargalo identificado!\n└── SimulationService (10ms)"
+      },
+      {
+        "id": "q-15-3",
+        "title": "Como funciona autenticação com JWT/OAuth2?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Fluxo simplificado:**\n**JWT (JSON Web Token):**\n**Spring Security com JWT:**\n**Resposta resumida:**\n*\"O frontend autentica no Identity Provider (Keycloak, Auth0) e recebe um JWT. A cada request, envia o token no header Authorization: Bearer <token>. O backend apenas valida a assinatura do JWT - é stateless, não precisa de sessão no servidor.\"*",
+        "code": "@Configuration\npublic class SecurityConfig {\n    @Bean\n    public SecurityFilterChain filterChain(HttpSecurity http) {\n        return http\n            .oauth2ResourceServer(oauth2 -> oauth2.jwt())\n            .build();\n    }\n}"
+      },
+      {
+        "id": "q-15-4",
+        "title": "Como você otimiza um Dockerfile para Java?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Multi-stage build:**\n**Otimizações:**\n1. **Multi-stage:** Imagem final não tem JDK/Maven\n2. **Imagem Alpine:** Muito menor que Ubuntu\n3. **Cache de layers:** `COPY pom.xml` antes do `COPY src`\n4. **JRE, não JDK:** Runtime não precisa compilador\n**Resultado:** Imagem de ~400MB → ~150MB",
+        "code": "# Stage 1: Build (imagem grande com JDK + Maven)\nFROM maven:3.9-eclipse-temurin-21 AS build\nWORKDIR /app\nCOPY pom.xml .\nRUN mvn dependency:go-offline   # Cache de dependências\nCOPY src ./src\nRUN mvn package -DskipTests\n\n# Stage 2: Runtime (imagem pequena só com JRE)\nFROM eclipse-temurin:21-jre-alpine\nCOPY --from=build /app/target/*.jar app.jar\nEXPOSE 8080\nENTRYPOINT [\"java\", \"-jar\", \"app.jar\"]"
+      },
+      {
+        "id": "q-15-5",
+        "title": "Diferença entre Pod, Deployment e Service no Kubernetes?",
+        "tags": [
+          "básico"
+        ],
+        "content": "",
+        "table": {
+          "headers": [
+            "Conceito",
+            "O que é",
+            "Analogia"
+          ],
+          "rows": [
+            [
+              "**Pod**",
+              "Menor unidade, contém 1+ containers",
+              "Uma instância da aplicação"
+            ],
+            [
+              "**Deployment**",
+              "Gerencia réplicas de Pods",
+              "\"Quero 3 cópias rodando\""
+            ],
+            [
+              "**Service**",
+              "Exposição de rede, load balancer",
+              "DNS fixo para acessar os Pods"
+            ]
+          ]
+        },
+        "code": "# Deployment: 3 réplicas do meu app\napiVersion: apps/v1\nkind: Deployment\nspec:\n  replicas: 3\n  template:\n    spec:\n      containers:\n      - name: customer-service\n        image: consignado/customer:1.0.0\n\n---\n# Service: Expõe na porta 80, roteia para Pods\napiVersion: v1\nkind: Service\nspec:\n  type: ClusterIP\n  ports:\n  - port: 80\n    targetPort: 8080"
+      },
+      {
+        "id": "q-15-6",
+        "title": "Diferença entre Optional.of e Optional.ofNullable?",
+        "tags": [
+          "básico"
+        ],
+        "content": "**Resposta (pegadinha clássica):**\n**Quando usar cada:**",
+        "table": {
+          "headers": [
+            "Método",
+            "Se valor for null",
+            "Quando usar"
+          ],
+          "rows": [
+            [
+              "`Optional.of(valor)`",
+              "**Lança NullPointerException**",
+              "Quando null é erro de programação"
+            ],
+            [
+              "`Optional.ofNullable(valor)`",
+              "Retorna `Optional.empty()`",
+              "Quando ausência é esperada"
+            ]
+          ]
+        },
+        "code": "// of() - tenho certeza que não é nulo\nOptional<Cliente> cliente = Optional.of(clienteRepository.findById(id).orElseThrow());\n\n// ofNullable() - pode ser nulo\nOptional<String> email = Optional.ofNullable(cliente.getEmail());"
+      },
+      {
+        "id": "q-15-7",
+        "title": "Como identificar problemas de performance no banco? (EXPLAIN ANALYZE)",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "Quando endpoint está lento, rodo `EXPLAIN ANALYZE` na query:\n**Resultado ruim (Full Table Scan):**\n**Resultado bom (Index Scan):**\n**Regra:** Se vejo \"Seq Scan\" em tabela grande, falta índice. Adiciono via Flyway:",
+        "code": "CREATE INDEX idx_clientes_cpf ON clientes(cpf);"
+      },
+      {
+        "id": "q-15-8",
+        "title": "O que fazer quando há dados inconsistentes no banco?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Passo 1:** Identificar escopo - quantos registros? Quando começou?\n**Passo 2:** Parar a causa - hotfix/rollback\n**Passo 3:** Correção\n**Passo 4:** Prevenir - adicionar constraint, validação",
+        "code": "-- Encontrar registros problemáticos\nSELECT * FROM contratos WHERE valor_liberado > margem_disponivel;",
+        "answer": "Primeiro paro a causa (hotfix). Quantifico com queries. Corrijo com script SQL. Documento e adiciono validação para não acontecer de novo."
+      },
+      {
+        "id": "q-15-9",
+        "title": "O que fazer quando transação trava (deadlock)?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**O que é:** Duas transações esperando lock uma da outra.\n**Resolver imediato:**\n**Prevenir:** Sempre lockar na mesma ordem",
+        "code": "Long first = Math.min(contaOrigemId, contaDestinoId);\nLong second = Math.max(contaOrigemId, contaDestinoId);\n// Locka sempre na ordem first → second",
+        "answer": "Deadlock é quando duas transações ficam esperando lock uma da outra. Previno garantindo que todos lockam na mesma ordem - sempre pelo menor ID primeiro."
+      },
+      {
+        "id": "q-15-10",
+        "title": "O que fazer quando há duplicação de dados?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Causas:** Falta de UNIQUE constraint, retry sem idempotência, race condition.\n**Corrigir:**\n**Idempotência:**",
+        "code": "if (repository.existsByIdempotencyKey(evento.key())) {\n    return; // Já processado\n}",
+        "answer": "Duplicação é falta de constraint UNIQUE ou falta de idempotência. Corrijo dados, adiciono constraint, implemento idempotência com chave única."
+      },
+      {
+        "id": "q-15-11",
+        "title": "O que fazer quando logs estão confusos/difícil de rastrear?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Problema:** Muitos logs sem contexto de qual request.\n**Solução: Correlation ID via MDC**\n**Resultado:**",
+        "code": "10:00:01 [abc-123] INFO Processando cliente\n10:00:01 [abc-123] ERROR Falhou\n→ grep \"abc-123\" para ver toda a jornada",
+        "answer": "Uso Correlation ID via MDC. Cada request tem UUID único em todos os logs. Fácil filtrar e rastrear."
+      },
+      {
+        "id": "q-15-12",
+        "title": "O que fazer quando não consegue reproduzir um bug?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "1. **Coletar:** logs, request exato, timestamp, versão\n2. **Reproduzir:** com mesmos dados em ambiente local\n3. **Diferenças:** verificar configs, dados, timing\n4. **Se não reproduzir:** adicionar logs extras, monitorar próxima ocorrência",
+        "answer": "Coleto todos os dados disponíveis. Tento reproduzir localmente. Se não conseguir, adiciono logs extras e monitoro para capturar mais informações na próxima ocorrência."
+      },
+      {
+        "id": "q-15-13",
+        "title": "O que fazer quando cliente reclama de lentidão?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Passo 1:** Qual endpoint? Desde quando? Só ele ou todos?\n**Passo 2:** Usar APM/tracing para ver gargalo\n**Passo 3:** Resolver por causa\n- Banco lento → índice\n- API externa → cache, async\n- Muitos dados → paginação",
+        "code": "Request (500ms total)\n├── Controller (5ms)\n├── Service (20ms)  \n├── Database (450ms)  ← GARGALO\n└── Response (5ms)",
+        "answer": "Uso APM para ver qual camada está lenta. Geralmente é banco sem índice ou API externa. Resolvo a causa e valido com cliente."
+      }
+    ]
+  }
+]
