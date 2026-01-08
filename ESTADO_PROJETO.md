@@ -9,10 +9,10 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Sprint Atual** | Sprint 1 - ✅ COMPLETA |
-| **Status** | 🟢 API REST funcionando |
-| **Última Atualização** | 2026-01-06 |
-| **Próxima Tarefa** | Sprint 2: Simulation Service |
+| **Sprint Atual** | Sprint 2 - 🚧 EM ANDAMENTO |
+| **Status** | 🟡 Criando consignado-simulation-service |
+| **Última Atualização** | 2026-01-08 |
+| **Próxima Tarefa** | Estrutura do novo microsserviço |
 
 ---
 
