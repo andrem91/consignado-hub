@@ -1,7 +1,8 @@
 services:
-  postgres:
+  # Customer Service Database
+  postgres-customer:
     image: postgres:15-alpine
-    container_name: consignado-db
+    container_name: consignado-customer-db
     ports:
       - "5432:5432"
     environment:
@@ -9,7 +10,21 @@ services:
       POSTGRES_PASSWORD: consignado
       POSTGRES_DB: consignado_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_customer_data:/var/lib/postgresql/data
+
+  # Simulation Service Database
+  postgres-simulation:
+    image: postgres:15-alpine
+    container_name: consignado-simulation-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: simulation
+      POSTGRES_PASSWORD: simulation123
+      POSTGRES_DB: simulation_db
+    volumes:
+      - postgres_simulation_data:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  postgres_customer_data:
+  postgres_simulation_data:
