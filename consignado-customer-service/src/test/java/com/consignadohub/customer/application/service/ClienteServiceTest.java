@@ -1,7 +1,7 @@
 package com.consignadohub.customer.application.service;
 
 import com.consignadohub.customer.application.exception.BusinessException;
-import com.consignadohub.customer.application.port.in.command.CadastrarClienteCommand;
+import com.consignadohub.customer.application.port.in.CadastrarClienteCommand;
 import com.consignadohub.customer.application.port.out.ClienteRepository;
 import com.consignadohub.customer.domain.model.Cliente;
 import com.consignadohub.customer.domain.vo.CPF;

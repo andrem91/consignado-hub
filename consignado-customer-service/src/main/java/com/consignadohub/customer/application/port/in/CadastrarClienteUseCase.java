@@ -1,4 +1,4 @@
-package com.consignadohub.customer.application.port.in.command;
+package com.consignadohub.customer.application.port.in;
 
 import com.consignadohub.customer.domain.vo.ClienteId;
 

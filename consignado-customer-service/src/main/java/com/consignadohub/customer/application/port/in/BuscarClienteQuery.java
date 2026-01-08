@@ -1,4 +1,4 @@
-package com.consignadohub.customer.application.port.in.query;
+package com.consignadohub.customer.application.port.in;
 
 import com.consignadohub.customer.domain.model.Cliente;
 import com.consignadohub.customer.domain.vo.CPF;
