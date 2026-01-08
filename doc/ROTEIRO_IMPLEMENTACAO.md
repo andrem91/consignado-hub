@@ -84,9 +84,19 @@ Sprint 7+ ░░░░░░░░░░░░░░░░░░░░░░░�
 
 ---
 
-## 🏗️ Arquiteturas e Patterns Adicionais
+## 🏗️ Arquiteturas e Patterns
 
-### ✅ Planejados para o Projeto
+### 📐 Arquitetura por Serviço
+
+| Serviço | Arquitetura | Justificativa |
+|---------|-------------|---------------|
+| **customer-service** | Hexagonal | CRUD + integrações, padrão base |
+| **simulation-service** | Hexagonal | Cálculos simples, poucos adapters |
+| **credit-service** | Hexagonal | Eventos Kafka, múltiplos adapters |
+| **contract-service** | **Clean Architecture** | Event Sourcing, domínio rico, múltiplos estados |
+| **payment-service** | Hexagonal | Muitas integrações bancárias |
+
+### ✅ Patterns Planejados
 
 | Pattern | Sprint | Módulo | Por que usar |
 |---------|--------|--------|--------------|

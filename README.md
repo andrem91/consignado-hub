@@ -91,9 +91,12 @@ Use o comando: `/modo-mentor`
 
 | Módulo | Arquitetura | Justificativa |
 |--------|-------------|---------------|
-| **CustomerService** | DDD Clássico + CQS | Cadastro simples |
-| **LoanService** | Event Sourcing + Ledger | Conciliação contábil financeira |
-| **LedgerService** | Partidas Dobradas | Eventos de saldo para auditoria |
+| **CustomerService** | Hexagonal | CRUD + integrações, padrão base |
+| **SimulationService** | Hexagonal | Cálculos simples, poucos adapters |
+| **CreditService** | Hexagonal | Eventos Kafka, múltiplos adapters |
+| **ContractService** | **Clean Architecture** | Event Sourcing, domínio rico, múltiplos estados |
+| **PaymentService** | Hexagonal | Muitas integrações bancárias |
+| **LedgerService** | Hexagonal + Partidas Dobradas | Eventos de saldo para auditoria |
 
 ### 🗄️ Persistência Poliglota (Polyglot Persistence)
 
