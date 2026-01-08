@@ -12,7 +12,7 @@
 # ===== Build =====
 target/
 build/
-out/
+/out/
 bin/
 *.class
 *.jar
