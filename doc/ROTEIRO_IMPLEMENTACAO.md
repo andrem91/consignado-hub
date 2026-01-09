@@ -1423,6 +1423,22 @@ public class ClienteService {
 
 > **Objetivo:** Calcular parcela de empréstimo com taxa fixa
 
+### 🏗️ Decisões Arquiteturais
+
+| Decisão | Escolha | Justificativa |
+|---------|---------|---------------|
+| **Banco** | Redis (sem PostgreSQL) | Simulações são efêmeras (24h) |
+| **Cache** | Por assinatura + Por ID | Evita recálculos |
+| **Futuro** | Migrar para Lambda (Sprint 8) | Serverless, paga por uso |
+
+### 🧠 Cache Inteligente
+
+```
+Chave por Assinatura: SIMUL:V{valor}:P{prazo}:T{taxa}
+Exemplo: SIMUL:V10000.00:P24:T1.66
+
+→ 500 pessoas pedem mesma simulação = 1 cálculo + 499 cache hits
+```
 
 ### 📋 User Stories
 

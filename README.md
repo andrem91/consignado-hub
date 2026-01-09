@@ -106,8 +106,9 @@ Use o comando: `/modo-mentor`
 |------|-------|---------|
 | Clientes, Contratos (estado) | **PostgreSQL** | ACID, JOINs, queries complexas |
 | Saldos Contábeis | **PostgreSQL** | Transações ACID |
+| **Simulações (efêmeras)** | **Redis** | Cache com TTL 24h, zero I/O de banco |
 | **Event Store (eventos)** | **DynamoDB** | Append-only, escala infinita, barato |
-| Cache | **Redis** | Performance, sessões |
+| Cache geral | **Redis** | Performance, sessões |
 
 ---
 
