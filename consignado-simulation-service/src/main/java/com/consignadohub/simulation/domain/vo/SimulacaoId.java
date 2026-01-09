@@ -4,15 +4,12 @@ import com.consignadohub.simulation.domain.exception.DomainException;
 
 import java.util.UUID;
 
-public class SimulacaoId {
+public record SimulacaoId(UUID valor) {
 
-    private final UUID valor;
-
-    private SimulacaoId(UUID valor) {
+    public SimulacaoId {
         if (valor == null) {
             throw DomainException.required("SimulacaoId");
         }
-        this.valor = valor;
     }
 
     public static SimulacaoId gerar() {
@@ -23,7 +20,4 @@ public class SimulacaoId {
         return new SimulacaoId(valor);
     }
 
-    public UUID valor() {
-        return valor;
-    }
 }
