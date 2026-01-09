@@ -17,7 +17,7 @@ public record PrazoParcela(int meses) {
         }
     }
 
-    public static PrazoParcela of(int meses) {
+    public static PrazoParcela meses(int meses) {
         return new PrazoParcela(meses);
     }
 }

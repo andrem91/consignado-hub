@@ -31,4 +31,16 @@ class SimulacaoIdTest {
         assertThatThrownBy(() -> SimulacaoId.of(null))
                 .isInstanceOf(DomainException.class);
     }
+
+    @Test
+    @DisplayName("Deve ser igual se o valor interno for igual")
+    void deveTerIgualdadeDeValor() {
+        UUID uuid = UUID.randomUUID();
+        SimulacaoId id1 = SimulacaoId.of(uuid);
+        SimulacaoId id2 = SimulacaoId.of(uuid); // Mesmo UUID
+
+        // Para VOs, isso TEM que ser verdade
+        assertThat(id1).isEqualTo(id2);
+        assertThat(id1.hashCode()).isEqualTo(id2.hashCode());
+    }
 }

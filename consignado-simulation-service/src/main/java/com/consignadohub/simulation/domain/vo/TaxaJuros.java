@@ -23,11 +23,11 @@ public record TaxaJuros(BigDecimal valorMensal) {
         }
     }
 
-    public static TaxaJuros of(BigDecimal valorMensal) {
+    public static TaxaJuros mensal(BigDecimal valorMensal) {
         return new TaxaJuros(valorMensal);
     }
 
-    public static TaxaJuros of(String valorMensal) {
+    public static TaxaJuros mensal(String valorMensal) {
         return new TaxaJuros(new BigDecimal(valorMensal));
     }
 
