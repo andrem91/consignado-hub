@@ -53,6 +53,46 @@ Este projeto simula um ambiente **real** de desenvolvimento:
 
 ---
 
+## 🔄 Metodologia de Desenvolvimento por Sprint
+
+> **"Discutir antes de codar"** - Cada serviço passa por fases bem definidas
+
+### Fases por Sprint
+
+| Fase | Objetivo | Entregável |
+|------|----------|------------|
+| **1. Discovery** | Entender o domínio | Diagrama de contexto, user stories |
+| **2. Architecture** | Decidir padrões | Hexagonal/Clean, banco, cache, patterns |
+| **3. Infrastructure** | Configurar ambiente | pom.xml, docker-compose, yaml |
+| **4. Implementation** | Codar com TDD | Domain → Application → Adapters |
+| **5. Verification** | Validar | Testes, curl, deploy |
+
+### Checklist de Planning (Fase 1-2)
+
+Antes de escrever código, responder:
+
+```
+□ O que esse serviço faz? (contexto de negócio)
+□ Qual arquitetura? (Hexagonal, Clean, Layered)
+□ Qual banco/cache? (PostgreSQL, Redis, DynamoDB)
+□ Quais VOs e Aggregates?
+□ Quais endpoints?
+□ Quais integrações?
+□ Tem cache? Qual estratégia?
+```
+
+### Exemplo: Simulation Service
+
+| Pergunta | Decisão |
+|----------|---------|
+| O que faz? | Calcula parcela com Price + IOF + CET |
+| Arquitetura? | Hexagonal |
+| Banco? | Redis (simulações são efêmeras) |
+| Cache? | Por assinatura (`SIMUL:V{valor}:P{prazo}:T{taxa}`) |
+| Endpoints? | `POST /simulacoes`, `GET /simulacoes/{id}` |
+
+---
+
 ## 🗓️ Roadmap Ágil
 
 ```
