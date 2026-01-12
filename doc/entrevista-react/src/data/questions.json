@@ -466,7 +466,7 @@
         "tags": [
           "intermediário"
         ],
-        "content": "**O que é idempotência?**\nExecutar a mesma operação múltiplas vezes produz o mesmo resultado.\n**Por que idempotência importa?**\nEm sistemas distribuídos, retries são comuns. Se o cliente não recebe resposta (timeout), ele reenvia. Com operações idempotentes, reenviar é seguro.",
+        "content": "Os principais métodos HTTP definem a ação a ser executada sobre um recurso. Cada método tem uma semântica específica:\n\n**GET:** Buscar/ler dados. Não altera estado. Seguro e idempotente.\n\n**POST:** Criar novo recurso. Cada chamada pode criar um recurso novo. NÃO é idempotente.\n\n**PUT:** Atualizar/substituir recurso completo. Idempotente - chamar várias vezes produz o mesmo resultado.\n\n**PATCH:** Atualizar parcialmente um recurso solicitado. Só envia os campos a alterar.\n\n**DELETE:** Remover recurso. Idempotente - deletar algo que já foi deletado não causa erro.",
         "table": {
           "headers": [
             "Método",
@@ -507,7 +507,8 @@
             ]
           ]
         },
-        "code": "PUT /clientes/123 { \"nome\": \"João\" }  → Sempre deixa nome = João\nPUT /clientes/123 { \"nome\": \"João\" }  → Mesmo resultado (idempotente)\n\nPOST /clientes { \"nome\": \"João\" }  → Cria cliente ID 1\nPOST /clientes { \"nome\": \"João\" }  → Cria cliente ID 2 (NÃO idempotente)"
+        "code": "PUT /clientes/123 { \"nome\": \"João\" }  → Sempre deixa nome = João\nPUT /clientes/123 { \"nome\": \"João\" }  → Mesmo resultado (idempotente)\n\nPOST /clientes { \"nome\": \"João\" }  → Cria cliente ID 1\nPOST /clientes { \"nome\": \"João\" }  → Cria cliente ID 2 (NÃO idempotente)",
+        "tip": "Idempotência é crucial em sistemas distribuídos. Se o cliente não recebe resposta (timeout), ele pode reenviar. Com operações idempotentes, reenviar é seguro."
       },
       {
         "id": "q-7-1",
@@ -1261,7 +1262,7 @@
         "tags": [
           "básico"
         ],
-        "content": "",
+        "content": "No Kubernetes, Pod, Deployment e Service são recursos fundamentais que trabalham juntos:\n\n**Pod:** É a menor unidade executável. Contém um ou mais containers rodando juntos. Pods são efêmeros - podem morrer e ser recriados.\n\n**Deployment:** Gerencia Pods de forma declarativa. Você diz \"quero 3 réplicas\" e o Kubernetes garante que sempre haverá 3 Pods rodando. Cuida de rolling updates e rollbacks.\n\n**Service:** Fornece um endpoint estável (DNS) para acessar Pods. Como Pods têm IPs dinâmicos, o Service funciona como load balancer e proxy.",
         "table": {
           "headers": [
             "Conceito",
