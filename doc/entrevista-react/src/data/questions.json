@@ -461,6 +461,15 @@
     "title": "🌐 7. HTTP, REST E COMUNICAÇÃO",
     "questions": [
       {
+        "id": "q-7-intro",
+        "title": "O que é HTTP e como funciona a comunicação cliente-servidor?",
+        "tags": [
+          "básico"
+        ],
+        "content": "HTTP (HyperText Transfer Protocol) é o protocolo de comunicação que permite a troca de informações na web. Funciona no modelo request-response:\n\n**Como funciona a comunicação:**\n1. **Cliente** (navegador, app, outra API) envia uma **Request** para o servidor\n2. **Servidor** processa a requisição\n3. **Servidor** envia uma **Response** de volta ao cliente\n\n**Estrutura de uma Request HTTP:**\n- **Método:** GET, POST, PUT, DELETE (a ação desejada)\n- **URL:** O recurso sendo acessado (`/clientes/123`)\n- **Headers:** Metadados (Content-Type, Authorization)\n- **Body:** Dados enviados (para POST/PUT)\n\n**Estrutura de uma Response HTTP:**\n- **Status Code:** 200 OK, 404 Not Found, 500 Error\n- **Headers:** Metadados da resposta\n- **Body:** Dados retornados (JSON, HTML)\n\n**Características importantes:**\n- **Stateless:** Cada request é independente, servidor não guarda estado\n- **Baseado em texto:** Mensagens são legíveis (diferente de protocolos binários)\n- **Porta padrão:** 80 (HTTP) ou 443 (HTTPS)",
+        "code": "── REQUEST ────────────────────────────\nPOST /clientes HTTP/1.1\nHost: api.consignadohub.com\nContent-Type: application/json\nAuthorization: Bearer <token>\n\n{\"nome\": \"Maria\", \"cpf\": \"12345678901\"}\n\n── RESPONSE ───────────────────────────\nHTTP/1.1 201 Created\nContent-Type: application/json\nLocation: /clientes/abc-123\n\n{\"id\": \"abc-123\", \"nome\": \"Maria\"}"
+      },
+      {
         "id": "q-7-0",
         "title": "Quais são os principais métodos HTTP e quando usar cada um?",
         "tags": [
