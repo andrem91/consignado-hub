@@ -10,7 +10,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @DisplayName("ClienteId Value Object")
-public class ClienteIdTest {
+class ClienteIdTest {
 
     @Test
     @DisplayName("Deve criar ClientId novo")

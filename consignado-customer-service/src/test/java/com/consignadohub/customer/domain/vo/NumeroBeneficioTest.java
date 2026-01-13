@@ -8,7 +8,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @DisplayName("NumeroBeneficio Value Object")
-public class NumeroBeneficioTest {
+class NumeroBeneficioTest {
 
     @Test
     @DisplayName("Deve criar número de benefício válido")

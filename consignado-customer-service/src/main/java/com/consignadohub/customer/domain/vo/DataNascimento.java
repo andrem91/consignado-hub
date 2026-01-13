@@ -7,27 +7,28 @@ import java.time.Period;
 
 public record DataNascimento(LocalDate valor) {
 
+    private static final String FIELD_NAME = "Data de nascimento";
     private static final int IDADE_MINIMA = 18;
     private static final int IDADE_MAXIMA = 120;
 
     public DataNascimento {
         if (valor == null)
-            throw DomainException.required("Data de nascimento");
+            throw DomainException.required(FIELD_NAME);
 
         if (valor.isAfter(LocalDate.now()))
-            throw DomainException.invalidField("Data de nascimento", "não pode ser uma data futura");
+            throw DomainException.invalidField(FIELD_NAME, "não pode ser uma data futura");
 
         int idade = calcularIdade(valor);
 
         if (idade < IDADE_MINIMA) {
-            throw DomainException.invalidField("Data de nascimento", "deve ser maior de idade");
+            throw DomainException.invalidField(FIELD_NAME, "deve ser maior de idade");
         }
 
         if (idade > IDADE_MAXIMA) {
-            throw DomainException.invalidField("Data de nascimento", "deve ser menor de 120 anos");
+            throw DomainException.invalidField(FIELD_NAME, "deve ser menor de 120 anos");
         }
 
-        }
+    }
 
     public int idade() {
         return calcularIdade(valor);
@@ -36,7 +37,5 @@ public record DataNascimento(LocalDate valor) {
     private static int calcularIdade(LocalDate dataNascimento) {
         return Period.between(dataNascimento, LocalDate.now()).getYears();
     }
-
-
 
 }

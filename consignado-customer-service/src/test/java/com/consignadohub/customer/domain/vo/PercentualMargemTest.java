@@ -10,7 +10,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @DisplayName("PercentualMargem Value Object")
-public class PercentualMargemTest {
+class PercentualMargemTest {
 
     @Test
     @DisplayName("Deve criar percentual válido")

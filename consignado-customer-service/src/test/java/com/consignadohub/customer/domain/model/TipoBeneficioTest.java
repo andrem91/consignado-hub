@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DisplayName("TipoBeneficio Enum")
-public class TipoBeneficioTest {
+class TipoBeneficioTest {
 
     @Test
     @DisplayName("Deve retornar descrição correta")

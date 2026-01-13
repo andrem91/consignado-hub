@@ -10,7 +10,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @DisplayName("Telefone Value Object")
-public class TelefoneTest {
+class TelefoneTest {
 
     @Test
     @DisplayName("Deve criar celular válido (11 dígitos)")

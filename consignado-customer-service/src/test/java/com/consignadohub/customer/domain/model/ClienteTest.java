@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Cliente Aggregate Root")
 class ClienteTest {
@@ -19,8 +19,7 @@ class ClienteTest {
                 "João da Silva",
                 new DataNascimento(LocalDate.of(1980, 5, 15)),
                 new Email("joao@email.com"),
-                new Telefone("11999887766")
-        );
+                new Telefone("11999887766"));
 
         assertThat(cliente.getId()).isNotNull();
         assertThat(cliente.getCpf().valor()).isEqualTo("52998224725");
@@ -39,12 +38,11 @@ class ClienteTest {
                 new NumeroBeneficio("1234567890"),
                 TipoBeneficio.APOSENTADORIA_POR_IDADE,
                 Dinheiro.of("2000.00"),
-                LocalDate.of(2020, 1, 15)
-        );
+                LocalDate.of(2020, 1, 15));
 
         cliente.adicionarBeneficio(beneficio);
 
-        assertThat(cliente.getBeneficios().size()).isEqualTo(1);
+        assertThat(cliente.getBeneficios()).hasSize(1);
     }
 
     @Test
@@ -64,16 +62,15 @@ class ClienteTest {
                 "João da Silva",
                 new DataNascimento(LocalDate.of(1980, 5, 15)),
                 new Email("joao@email.com"),
-                new Telefone("11999887766")
-        );
+                new Telefone("11999887766"));
     }
+
     private Beneficio criarBeneficio(Dinheiro valor) {
         return new Beneficio(
                 new NumeroBeneficio("1234567890"),
                 TipoBeneficio.APOSENTADORIA_POR_IDADE,
                 Dinheiro.of(valor.valor()),
-                LocalDate.of(2020, 1, 15)
-        );
+                LocalDate.of(2020, 1, 15));
     }
 
 }

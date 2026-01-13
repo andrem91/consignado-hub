@@ -13,7 +13,7 @@ public record CPF(String valor) {
         if (valor == null || valor.isBlank()) {
             throw DomainException.required("cpf");
         }
-        valor = valor.replaceAll("[^0-9]", "");
+        valor = valor.replaceAll("\\D", "");
 
         if (valor.length() != 11) {
             throw DomainException.invalidField("cpf", "deve ter 11 dígitos");
@@ -45,7 +45,8 @@ public record CPF(String valor) {
     private static boolean todosDigitosIguais(String cpf) {
         char primeiro = cpf.charAt(0);
         for (int i = 1; i < cpf.length(); i++) {
-            if (cpf.charAt(i) != primeiro) return false;
+            if (cpf.charAt(i) != primeiro)
+                return false;
         }
         return true;
     }
@@ -61,7 +62,8 @@ public record CPF(String valor) {
         int r = 11 - (sum % 11);
         int digit1 = (r == 10 || r == 11) ? 0 : r;
 
-        if (digit1 != (cpf.charAt(9) - '0')) return false;
+        if (digit1 != (cpf.charAt(9) - '0'))
+            return false;
 
         sum = 0;
         weight = 11;

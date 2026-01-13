@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @DisplayName("ClienteService")
-public class ClienteServiceTest {
+class ClienteServiceTest {
 
     private ClienteService service;
     private ClienteRepository repository;
