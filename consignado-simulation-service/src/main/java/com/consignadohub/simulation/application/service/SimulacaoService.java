@@ -9,6 +9,10 @@ import com.consignadohub.simulation.domain.vo.PrazoParcela;
 import com.consignadohub.simulation.domain.vo.TaxaJuros;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementa o caso de uso de Simulação de Empréstimo.
+ * Usa cache para evitar recálculos da mesma simulação.
+ */
 @Service
 public class SimulacaoService implements SimularEmprestimoUseCase {
 
@@ -24,16 +28,19 @@ public class SimulacaoService implements SimularEmprestimoUseCase {
     public Simulacao executar(SimularEmprestimoCommand command) {
         String assinatura = gerarAssinatura(command);
 
+        // 1. Tenta buscar do cache
         var simulacaoCacheada = cache.buscarPorAssinatura(assinatura);
         if (simulacaoCacheada.isPresent()) {
             return simulacaoCacheada.get();
         }
 
+        // 2. Se não existe, cria nova simulação
         Simulacao novaSimulacao = Simulacao.criar(
                 Dinheiro.of(command.valorSolicitado()),
                 PrazoParcela.meses(command.prazoMeses()),
                 taxaPadrao);
 
+        // 3. Salva no cache e retorna
         cache.salvar(novaSimulacao, assinatura);
         return novaSimulacao;
     }
