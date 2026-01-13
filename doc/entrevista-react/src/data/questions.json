@@ -609,6 +609,15 @@
         "code": "ContratoAssinado → [Kafka] → EmailService (envia email)\n                          → AuditoriaService (registra log)\n                          → INSSService (averba)"
       },
       {
+        "id": "q-7-3b",
+        "title": "Como implementar comunicação síncrona e assíncrona entre microsserviços?",
+        "tags": [
+          "intermediário"
+        ],
+        "content": "**Comunicação Síncrona (cliente espera resposta):**\n\nTecnologias comuns:\n- **REST/HTTP:** Mais usado, simples, funciona com qualquer linguagem\n- **gRPC:** Binário, mais rápido, ideal para comunicação interna\n- **GraphQL:** Cliente define quais dados quer\n\nNo Spring, usamos:\n- `RestTemplate` (legado)\n- `WebClient` (reativo, recomendado)\n- `Feign Client` (declarativo, mais limpo)\n\n**Comunicação Assíncrona (não espera resposta):**\n\nTecnologias comuns:\n- **Kafka:** Event streaming, alta escala, replay de eventos\n- **RabbitMQ:** Message queue tradicional, mais simples\n- **AWS SQS/SNS:** Filas gerenciadas na nuvem\n\nNo Spring, usamos:\n- `KafkaTemplate` e `@KafkaListener`\n- `RabbitTemplate` e `@RabbitListener`\n- Spring Cloud Stream (abstração)\n\n**Regra prática:**\n- Precisa de resposta imediata? → Síncrono (REST/gRPC)\n- Pode processar depois? → Assíncrono (Kafka/RabbitMQ)",
+        "code": "// SÍNCRONO - Feign Client\n@FeignClient(name = \"customer-service\")\npublic interface CustomerClient {\n    @GetMapping(\"/clientes/{cpf}\")\n    ClienteResponse buscar(@PathVariable String cpf);\n}\n\n// ASSÍNCRONO - Kafka\n@Service\npublic class EventPublisher {\n    public void publicar(ContratoEvent evento) {\n        kafkaTemplate.send(\"contratos\", evento);\n    }\n}\n\n@KafkaListener(topics = \"contratos\")\npublic void processar(ContratoEvent evento) {\n    // Processa quando receber\n}"
+      },
+      {
         "id": "q-7-4",
         "title": "O que acontece se o serviço destino estiver fora do ar?",
         "tags": [
