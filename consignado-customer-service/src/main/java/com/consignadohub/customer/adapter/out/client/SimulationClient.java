@@ -11,10 +11,7 @@ import java.util.Map;
 /**
  * Feign Client para comunicação com Simulation Service.
  */
-@FeignClient(
-        name = "simulation-service",
-        url = "${servicer.simulation.url}"
-)
+@FeignClient(name = "simulation-service", url = "${services.simulation.url}")
 public interface SimulationClient {
 
     @PostMapping("/simulacoes")
@@ -23,7 +20,6 @@ public interface SimulationClient {
     default SimulacaoDTO simular(BigDecimal valorSolicitado, int prazoMeses) {
         return simular(Map.of(
                 "valorSolicitado", valorSolicitado,
-                "prazoMeses", prazoMeses
-        ));
+                "prazoMeses", prazoMeses));
     }
 }
