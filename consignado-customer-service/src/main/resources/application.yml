@@ -17,3 +17,7 @@ spring:
 
   flyway:
     enabled: true
+
+services:
+  simulation:
+    url: http://localhost:8081
