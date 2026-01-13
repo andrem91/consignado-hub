@@ -2,6 +2,11 @@ package com.consignadohub.simulation.domain.exception;
 
 import lombok.Getter;
 
+/**
+ * Exceção para erros de validação e regras do domínio.
+ * Contém código estruturado e campo afetado para tratamento adequado.
+ * Usada por Value Objects e Aggregates quando dados são inválidos.
+ */
 @Getter
 public class DomainException extends RuntimeException {
 
@@ -24,15 +29,13 @@ public class DomainException extends RuntimeException {
         return new DomainException(
                 "INVALID_" + field.toUpperCase(),
                 field,
-                String.format("%s: %s", field, reason)
-        );
+                String.format("%s: %s", field, reason));
     }
 
     public static DomainException required(String field) {
         return new DomainException(
-            "REQUIRED_FIELD",
+                "REQUIRED_FIELD",
                 field,
-                String.format("%s é obrigatório", field)
-        );
+                String.format("%s é obrigatório", field));
     }
 }

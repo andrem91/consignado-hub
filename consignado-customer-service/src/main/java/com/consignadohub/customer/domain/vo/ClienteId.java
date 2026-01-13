@@ -4,6 +4,10 @@ import com.consignadohub.customer.domain.exception.DomainException;
 
 import java.util.UUID;
 
+/**
+ * Value Object que representa o identificador único de um Cliente.
+ * Usa UUID para garantir unicidade e evitar conflitos.
+ */
 public record ClienteId(UUID valor) {
 
     public ClienteId {

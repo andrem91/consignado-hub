@@ -13,6 +13,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Implementação dos casos de uso de Cliente.
+ * Orquestra operações de cadastro e busca, aplicando regras de negócio.
+ * Implementa CadastrarClienteUseCase e BuscarClienteQuery.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

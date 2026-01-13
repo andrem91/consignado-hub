@@ -2,6 +2,11 @@ package com.consignadohub.customer.domain.vo;
 
 import com.consignadohub.customer.domain.exception.DomainException;
 
+/**
+ * Value Object que representa um CPF válido.
+ * Valida dígitos verificadores usando algoritmo oficial da Receita Federal.
+ * Armazena apenas números, sem formatação.
+ */
 public record CPF(String valor) {
 
     public CPF {

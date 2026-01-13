@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Aggregate Root que representa um cliente do sistema.
+ * Contém dados pessoais, contato e lista de benefícios INSS.
+ * Garante invariantes e regras de negócio do cliente.
+ */
 @Getter
 public class Cliente {
 

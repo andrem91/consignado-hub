@@ -14,6 +14,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller REST para operações de Cliente.
+ * Expõe endpoints para cadastro e busca de clientes.
+ * Usa DTOs para entrada/saída, delegando lógica aos Use Cases.
+ */
 @RestController
 @RequestMapping("/clientes")
 @RequiredArgsConstructor

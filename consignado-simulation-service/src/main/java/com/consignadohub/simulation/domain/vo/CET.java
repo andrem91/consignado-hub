@@ -5,6 +5,11 @@ import com.consignadohub.simulation.domain.exception.DomainException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/**
+ * Value Object que representa o CET (Custo Efetivo Total) anual.
+ * CET inclui juros, IOF e encargos, representando o custo real do empréstimo.
+ * Exigido por lei para transparência ao consumidor (Resolução CMN 3.517/2007).
+ */
 public record CET(BigDecimal valorAnual) {
 
     public CET {

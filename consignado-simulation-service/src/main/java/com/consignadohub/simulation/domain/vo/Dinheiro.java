@@ -7,6 +7,11 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+/**
+ * Value Object que representa um valor monetário em Reais (BRL).
+ * Imutável, sempre com 2 casas decimais, não permite valores negativos.
+ * Suporta operações matemáticas (somar, subtrair, multiplicar, dividir).
+ */
 public record Dinheiro(BigDecimal valor) implements Comparable<Dinheiro> {
 
     public static final Dinheiro ZERO = new Dinheiro(BigDecimal.ZERO);

@@ -4,6 +4,10 @@ import com.consignadohub.simulation.domain.exception.DomainException;
 
 import java.util.UUID;
 
+/**
+ * Value Object que representa o identificador único de uma Simulação.
+ * Usa UUID para garantir unicidade.
+ */
 public record SimulacaoId(UUID valor) {
 
     public SimulacaoId {

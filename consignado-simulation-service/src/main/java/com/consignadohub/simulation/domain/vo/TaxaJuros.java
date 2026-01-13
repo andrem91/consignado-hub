@@ -5,6 +5,11 @@ import com.consignadohub.simulation.domain.exception.DomainException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/**
+ * Value Object que representa uma taxa de juros mensal.
+ * Validada entre 0% e 2.14% (limite legal para consignado).
+ * Fornece métodos para conversão para decimal e taxa anual equivalente.
+ */
 public record TaxaJuros(BigDecimal valorMensal) {
 
     private static final BigDecimal LIMITE_MAXIMO = new BigDecimal("2.14");

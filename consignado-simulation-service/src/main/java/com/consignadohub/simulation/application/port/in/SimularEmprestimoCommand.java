@@ -4,15 +4,19 @@ import com.consignadohub.simulation.application.exception.BusinessException;
 
 import java.math.BigDecimal;
 
+/**
+ * Command (DTO de entrada) para o caso de uso de simulação de empréstimo.
+ * Contém os dados necessários: valor solicitado e prazo em meses.
+ * Valida as entradas no construtor (fail-fast).
+ */
 public record SimularEmprestimoCommand(
         BigDecimal valorSolicitado,
-        int prazoMeses
-) {
+        int prazoMeses) {
     private static final int PRAZO_MINIMO = 6;
     private static final int PRAZO_MAXIMO = 84;
 
     public SimularEmprestimoCommand {
-        if(prazoMeses < PRAZO_MINIMO) {
+        if (prazoMeses < PRAZO_MINIMO) {
             throw new BusinessException("Prazo mínimo é de " + PRAZO_MINIMO + " meses");
         }
         if (prazoMeses > PRAZO_MAXIMO) {
