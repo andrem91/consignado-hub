@@ -2,6 +2,8 @@ package com.consignadohub.customer.adapter.in.web;
 
 import com.consignadohub.customer.adapter.in.web.dto.CadastrarClienteRequest;
 import com.consignadohub.customer.adapter.in.web.dto.ClienteResponse;
+import com.consignadohub.customer.adapter.out.client.SimulationClient;
+import com.consignadohub.customer.adapter.out.client.dto.SimulacaoDTO;
 import com.consignadohub.customer.application.exception.NotFoundException;
 import com.consignadohub.customer.application.port.in.CadastrarClienteCommand;
 import com.consignadohub.customer.application.port.in.CadastrarClienteUseCase;
@@ -14,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
 /**
  * Controller REST para operações de Cliente.
  * Expõe endpoints para cadastro e busca de clientes.
@@ -24,43 +29,53 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ClienteController {
 
-    private final CadastrarClienteUseCase cadastrarCliente;
-    private final BuscarClienteQuery buscarCliente;
+        private final CadastrarClienteUseCase cadastrarCliente;
+        private final BuscarClienteQuery buscarCliente;
+        private final SimulationClient simulationClient;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ClienteResponse cadastrar(@Valid @RequestBody CadastrarClienteRequest request) {
-        CadastrarClienteCommand command = new CadastrarClienteCommand(
-                request.cpf(),
-                request.nome(),
-                request.dataNascimento(),
-                request.email(),
-                request.telefone()
-        );
+        @PostMapping
+        @ResponseStatus(HttpStatus.CREATED)
+        public ClienteResponse cadastrar(@Valid @RequestBody CadastrarClienteRequest request) {
+                CadastrarClienteCommand command = new CadastrarClienteCommand(
+                                request.cpf(),
+                                request.nome(),
+                                request.dataNascimento(),
+                                request.email(),
+                                request.telefone());
 
-        ClienteId id = cadastrarCliente.executar(command);
+                ClienteId id = cadastrarCliente.executar(command);
 
-        Cliente cliente = buscarCliente.buscarPorId(id)
-                .orElseThrow(() -> NotFoundException.cliente("Cliente não encontrado"));
+                Cliente cliente = buscarCliente.buscarPorId(id)
+                                .orElseThrow(() -> NotFoundException.cliente("Cliente não encontrado"));
 
-        return toResponse(cliente);
-    }
+                return toResponse(cliente);
+        }
 
-    @GetMapping("/{cpf}")
-    public ClienteResponse buscarPorCpf(@PathVariable String cpf) {
-        return buscarCliente.buscarPorCpf(new CPF(cpf))
-                .map(this::toResponse)
-                .orElseThrow(() -> NotFoundException.cliente(cpf));
-    }
+        @GetMapping("/{cpf}")
+        public ClienteResponse buscarPorCpf(@PathVariable String cpf) {
+                return buscarCliente.buscarPorCpf(new CPF(cpf))
+                                .map(this::toResponse)
+                                .orElseThrow(() -> NotFoundException.cliente(cpf));
+        }
 
-    private ClienteResponse toResponse(Cliente cliente) {
-        return new ClienteResponse(
-                cliente.getId().valor(),
-                cliente.getCpf().formatar(),
-                cliente.getNome(),
-                cliente.getDataNascimento().valor(),
-                cliente.getEmail() != null ? cliente.getEmail().valor() : null,
-                cliente.getTelefone() != null ? cliente.getTelefone().valor() : null
-        );
-    }
+        @GetMapping("/{id}/simulacao")
+        public SimulacaoDTO simularParcela(
+                        @PathVariable UUID id,
+                        @RequestParam BigDecimal valor,
+                        @RequestParam int prazo) {
+                buscarCliente.buscarPorId(ClienteId.of(id))
+                                .orElseThrow(() -> NotFoundException.cliente("Cliente não encontrado"));
+
+                return simulationClient.simular(valor, prazo);
+        }
+
+        private ClienteResponse toResponse(Cliente cliente) {
+                return new ClienteResponse(
+                                cliente.getId().valor(),
+                                cliente.getCpf().formatar(),
+                                cliente.getNome(),
+                                cliente.getDataNascimento().valor(),
+                                cliente.getEmail() != null ? cliente.getEmail().valor() : null,
+                                cliente.getTelefone() != null ? cliente.getTelefone().valor() : null);
+        }
 }
