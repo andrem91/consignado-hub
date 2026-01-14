@@ -9,10 +9,10 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Sprint Atual** | Sprint 2 - 🚧 EM ANDAMENTO |
-| **Status** | 🟡 Criando consignado-simulation-service |
-| **Última Atualização** | 2026-01-08 |
-| **Próxima Tarefa** | Estrutura do novo microsserviço |
+| **Sprint Atual** | Sprint 2 - ✅ CONCLUÍDO |
+| **Status** | 🟢 Pronto para Sprint 3 |
+| **Última Atualização** | 2026-01-14 |
+| **Próxima Tarefa** | Swagger/OpenAPI + Contract Service |
 
 ---
 
@@ -39,8 +39,65 @@
 - [x] ClienteController (REST API)
 - [x] CadastrarClienteRequest, ClienteResponse
 
-**Total Sprint 1: 33 testes**  
-**Total Geral: 68+ testes ✅**
+**Total Sprint 1: 33 testes**
+
+---
+
+### Sprint 2: Simulation Service ✅
+
+#### ✅ Fase 1: Setup
+- [x] Criar consignado-simulation-service
+- [x] Estrutura hexagonal (domain/application/adapter)
+- [x] Configurar application.yaml (porta 8081)
+- [x] Configurar pom.xml (Redis em vez de JPA/PostgreSQL)
+- [x] Atualizar docker-compose (Redis)
+
+#### ✅ Fase 2: Domain
+- [x] SimulacaoId + SimulacaoIdTest (3 testes)
+- [x] Simulacao + SimulacaoTest (5 testes) - Cálculos Price, IOF, CET
+
+#### ✅ Fase 3: Application
+- [x] SimularEmprestimoCommand + Testes
+- [x] SimularEmprestimoUseCase (interface)
+- [x] SimulacaoCache (Port Out)
+- [x] SimulacaoService + SimulacaoServiceTest
+
+#### ✅ Fase 4: Adapters
+- [x] SimulacaoController (POST /simulacoes)
+- [x] SimularEmprestimoRequest, SimulacaoResponse (DTOs)
+- [x] SimulacaoRedisAdapter (cache em memória)
+- [x] SimulationConfig (bean TaxaJuros)
+
+**Total Sprint 2: 10+ testes**
+
+---
+
+### Integração Customer ↔ Simulation ✅
+
+- [x] Spring Cloud OpenFeign (2025.0.0)
+- [x] SimulationClient (Feign interface)
+- [x] SimulacaoDTO
+- [x] Endpoint GET /clientes/{id}/simulacao
+- [x] Testado com curl: integração funcionando!
+
+---
+
+## 🔧 Correções SonarQube Aplicadas
+
+- [x] DataNascimento: constante FIELD_NAME
+- [x] CPF: regex `\\D` em vez de `[^0-9]`
+- [x] PercentualMargem: constante FIELD_NAME
+- [x] Dinheiro: constante FIELD_NAME
+- [x] ClienteTest: `hasSize()` em vez de `.size().isEqualTo()`
+
+---
+
+## 📊 Serviços Ativos
+
+| Serviço | Porta | Status | Banco |
+|---------|-------|--------|-------|
+| Customer Service | 8080 | ✅ Funcionando | PostgreSQL |
+| Simulation Service | 8081 | ✅ Funcionando | Redis (em memória) |
 
 ---
 
@@ -54,18 +111,18 @@
 
 ## 📌 Última Sessão
 
-**Data:** 2026-01-06
+**Data:** 2026-01-14
 
 **O que foi feito:**
-- Sprint 1 Customer Service COMPLETA
-- Fase 2: Ports CQS (Command/Query), ClienteService com TDD
-- Fase 3: docker-compose, JPA Adapters, Controller REST
-- API testada com curl: POST /clientes funcionando
+- Sprint 2 Simulation Service COMPLETO
+- Integração Customer ↔ Simulation via Feign Client
+- Endpoint GET /clientes/{id}/simulacao funcionando
+- Correções SonarQube (constantes, regex, assertions)
+- JavaDoc adicionado em 15+ classes
 
 **Próximos passos:**
-- Sprint 2: Simulation Service (cálculo de parcelas)
-- Implementar endpoint de simulação
-- Cálculo Price + IOF
+- Implementar Swagger/OpenAPI
+- Sprint 3: Contract Service (averbação, contratos)
 
 ---
 
